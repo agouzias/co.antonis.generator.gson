@@ -100,7 +100,7 @@ public class CodeGenerator {
 
 
     //region Methods Setters
-    CodeGenerator() {
+    public CodeGenerator() {
     }
 
     public CodeGenerator setPrintLogInfo(boolean printLogInfo) {
