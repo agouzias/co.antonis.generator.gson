@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <g:HTMLPanel ui:field="uiContainerJson"/>
+        <g:HTMLPanel ui:field="uiContainerStructure"/>
+        <g:Button ui:field="uiButtonJsonFrom">From Json</g:Button>
+        <g:Button ui:field="uiButtonToJson">To Json</g:Button>
+    </g:HTMLPanel>
+</ui:UiBinder>

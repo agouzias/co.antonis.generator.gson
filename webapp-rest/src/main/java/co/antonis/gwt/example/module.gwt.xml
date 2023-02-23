@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the module name is the folder name $module.short.name-->
+<module rename-to="webapp.rest">
+  <inherits name="com.google.gwt.user.User" />
+  <inherits name="com.google.gwt.user.theme.clean.Clean" />
+  <inherits name="com.google.gwt.logging.Logging"/>
+  <inherits name="co.antonis.generator.model.SamplePojo"/>
+
+  <set-property name="gwt.logging.logLevel" value="INFO"/>
+  <set-property name="gwt.logging.enabled" value="TRUE"/>
+
+  <entry-point class="co.antonis.gwt.example.client.App" />
+
+  <source path="client" />
+  <!-- Only support recent browsers -->
+  <set-property name="user.agent" value="gecko1_8,safari" />
+</module>

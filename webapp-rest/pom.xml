@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>co.antonis.generator</groupId>
+    <artifactId>gwt-rest</artifactId>
+    <version>1.snap</version>
+    <packaging>jar</packaging>
+
+    <!-- used in tboyer -->
+    <!--<packaging>gwt-app</packaging>-->
+
+    <properties>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <folder.release>${basedir}/distribution</folder.release>
+        <module.short.name>webapp.rest</module.short.name>
+        <version.plugin.ant>3.1.0</version.plugin.ant>
+
+
+        <!-- GWT (used in gwt-console)-->
+        <version.gwt>2.10.0</version.gwt>
+        <version.gwt.style>OBF</version.gwt.style>
+        <version.plugin.gwt>2.9.0</version.plugin.gwt>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>co.antonis.generator</groupId>
+            <artifactId>generator</artifactId>
+            <version>1.snap</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${version.gwt}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${version.gwt}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!-- <plugin>
+               <groupId>net.ltgt.gwt.maven</groupId>
+               <artifactId>gwt-maven-plugin</artifactId>
+               <configuration>
+                 <moduleName>co.antonis.gwt.example.client.App</moduleName>
+                 &lt;!&ndash;<moduleShortName>${module.toLowerCase()}</moduleShortName>&ndash;&gt;
+                 <moduleShortName>${module.short.name}</moduleShortName>
+               </configuration>
+             </plugin>-->
+
+            <!-- GWT Maven Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${version.plugin.gwt}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <!--<goal>test</goal>-->
+                            <!--<goal>i18n</goal>-->
+                            <!--<goal>generateAsync</goal>-->
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- DEFAULT is 'OBF' ${version.gwt.style} -->
+                    <style>OBF</style>
+                    <runTarget>index.html</runTarget>
+                    <!--<sourceLevel>${java.lang.source.version}</sourceLevel>-->
+                    <sourceLevel>${maven.compiler.release}</sourceLevel>
+                    <hostedWebapp>${webappDirectory}</hostedWebapp>
+                    <!-- based on -->
+                    <generateJsInteropExports>true</generateJsInteropExports>
+                    <extraJvmArgs default-value="-Xmx1024m">-Xmx1024m</extraJvmArgs>
+                </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${version.plugin.ant}</version>
+                <executions>
+                    <execution>
+                        <id>clean-and-copy-to-distribution-folder</id>
+                        <phase>install</phase>
+                        <!--<phase>validate</phase>-->
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo level="info" message="Transfer data at ${folder.release}\r\n"/>
+                                <echo level="info" message="Source Dir:${project.build.sourceDirectory} , Final Name:${project.build.finalName}\r\n"/>
+
+                                <delete includeEmptyDirs="true" failonerror="false">
+                                    <fileset dir="${folder.release}" includes="**"/>
+                                </delete>
+
+                                <mkdir dir="${folder.release}"/>
+
+                                <copy todir="${folder.release}">
+                                    <!-- copy generated from gwt code (copy target/'module-name' to distribution)-->
+                                    <fileset dir="${project.build.directory}/${project.build.finalName}"/>
+                                    <!-- copy index.html and all the resources folder -->
+                                    <fileset dir="${project.build.sourceDirectory}/../resources"/>
+                                </copy>
+
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>clean-distribution-folder</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <target>
+                                <echo level="info" message="Cleaning Dir:${folder.release}"/>
+
+                                <delete includeEmptyDirs="true" failonerror="false">
+                                    <fileset dir="${folder.release}" includes="**"/>
+                                </delete>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <!-- because of the "Recompile with -Xlint:deprecation for details". -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                   <!-- <source>1.8</source>
+                    <target>1.8</target>
+                    <testSource>1.8</testSource>
+                    <testTarget>1.8</testTarget>-->
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+</project>

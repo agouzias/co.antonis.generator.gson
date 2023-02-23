@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <pre ui:field="containerAce" style="width:100%">
+            function foo(items) {
+            var i;
+            for (i = 0; i &lt; items.length; i++) {
+            alert("Ace Rocks " + items[i]);
+            }
+            }
+        </pre>
+    </g:HTMLPanel>
+</ui:UiBinder>
