@@ -15,9 +15,9 @@ import java.util.logging.Logger;
 /**
  * Generated for total 3 structures 
  * 
- * co.antonis.generator.model.samplePojo.PojoParent [fields:17/17] 
  * co.antonis.generator.model.samplePojo.PojoSimple [fields:4/4] 
- * co.antonis.generator.model.samplePojo.sub.PojoChild [fields:18/1] 
+ * co.antonis.generator.model.samplePojo.PojoParent [fields:18/18] 
+ * co.antonis.generator.model.samplePojo.sub.PojoChild [fields:19/1] 
  */
 public class SerializationGWTJson {
   public static Logger log = Logger.getLogger("");
@@ -54,8 +54,39 @@ public class SerializationGWTJson {
     } catch (Exception ignored) {}
     try {
         return dateFormat_ISO8601.parse(jsonDate);
-    }catch(Exception ignored){}
+    } catch (Exception ignored){}
     return dateFormat_Original.parse(jsonDate);
+  }
+
+  public static PojoSimple toPojoSimple(String json) {
+    JSONValue jsonValue = JSONParser.parseStrict(json);
+    JSONObject jsonObject = jsonValue.isObject();
+    
+    if (jsonObject != null)  {
+      PojoSimple structure = new PojoSimple();
+      if(jsonObject.get("stringSimple")!=null) {
+        log.info("Field:stringSimple:"+jsonObject.get("stringSimple"));
+        structure.setStringSimple(jsonObject.get("stringSimple").isString().stringValue());
+      }
+      if(jsonObject.get("intSimple")!=null) {
+        log.info("Field:intSimple:"+jsonObject.get("intSimple"));
+        structure.setIntSimple(Integer.parseInt(jsonObject.get("intSimple").toString()));
+      }
+      if(jsonObject.get("dateSimple")!=null) {
+        log.info("Field:dateSimple:"+jsonObject.get("dateSimple"));
+        structure.setDateSimple(toDateFromV(jsonObject.get("dateSimple")/*.isString().stringValue()*/));
+      }
+      if(jsonObject.get("listDateSimple")!=null) {
+        log.info("Field:listDateSimple:"+jsonObject.get("listDateSimple"));
+        structure.setListDateSimple(SerializationGWTUtilities.toListFromS(jsonObject.get("listDateSimple"),(s)->toDateFromS(s)));
+      }
+      return structure;
+    }
+    return null;
+  }
+
+  public static String fromPojoSimple(PojoSimple structure) {
+    return "TODO";
   }
 
   public static PojoParent toPojoParent(String json) {
@@ -71,6 +102,10 @@ public class SerializationGWTJson {
       if(jsonObject.get("booleanValue")!=null) {
         log.info("Field:booleanValue:"+jsonObject.get("booleanValue"));
         structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("booleanValue").toString()));
+      }
+      if(jsonObject.get("mapChild")!=null) {
+        log.info("Field:mapChild:"+jsonObject.get("mapChild"));
+        structure.setMapChild(SerializationGWTUtilities.toMapFromS(jsonObject.get("mapChild"),(s)->s!=null ? Integer.parseInt(s) : null,(s) -> toPojoSimple(s)));
       }
       if(jsonObject.get("charNotSet")!=null) {
         log.info("Field:charNotSet:"+jsonObject.get("charNotSet"));
@@ -96,7 +131,7 @@ public class SerializationGWTJson {
       }
       if(jsonObject.get("child")!=null) {
         log.info("Field:simple:"+jsonObject.get("child"));
-        structure.setSimple(toPojoSimple(jsonObject.get("child").isString().stringValue()));
+        structure.setSimple(toPojoSimple(jsonObject.get("child").isObject().toString()));
       }
       if(jsonObject.get("listLong")!=null) {
         log.info("Field:listLong:"+jsonObject.get("listLong"));
@@ -139,37 +174,6 @@ public class SerializationGWTJson {
     return "TODO";
   }
 
-  public static PojoSimple toPojoSimple(String json) {
-    JSONValue jsonValue = JSONParser.parseStrict(json);
-    JSONObject jsonObject = jsonValue.isObject();
-    
-    if (jsonObject != null)  {
-      PojoSimple structure = new PojoSimple();
-      if(jsonObject.get("stringSimple")!=null) {
-        log.info("Field:stringSimple:"+jsonObject.get("stringSimple"));
-        structure.setStringSimple(jsonObject.get("stringSimple").isString().stringValue());
-      }
-      if(jsonObject.get("intSimple")!=null) {
-        log.info("Field:intSimple:"+jsonObject.get("intSimple"));
-        structure.setIntSimple(Integer.parseInt(jsonObject.get("intSimple").toString()));
-      }
-      if(jsonObject.get("dateSimple")!=null) {
-        log.info("Field:dateSimple:"+jsonObject.get("dateSimple"));
-        structure.setDateSimple(toDateFromV(jsonObject.get("dateSimple")/*.isString().stringValue()*/));
-      }
-      if(jsonObject.get("listDateSimple")!=null) {
-        log.info("Field:listDateSimple:"+jsonObject.get("listDateSimple"));
-        structure.setListDateSimple(SerializationGWTUtilities.toListFromS(jsonObject.get("listDateSimple"),(s)->toDateFromS(s)));
-      }
-      return structure;
-    }
-    return null;
-  }
-
-  public static String fromPojoSimple(PojoSimple structure) {
-    return "TODO";
-  }
-
   public static PojoChild toPojoChild(String json) {
     JSONValue jsonValue = JSONParser.parseStrict(json);
     JSONObject jsonObject = jsonValue.isObject();
@@ -183,6 +187,10 @@ public class SerializationGWTJson {
       if(jsonObject.get("booleanValue")!=null) {
         log.info("Field:booleanValue:"+jsonObject.get("booleanValue"));
         structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("booleanValue").toString()));
+      }
+      if(jsonObject.get("mapChild")!=null) {
+        log.info("Field:mapChild:"+jsonObject.get("mapChild"));
+        structure.setMapChild(SerializationGWTUtilities.toMapFromS(jsonObject.get("mapChild"),(s)->s!=null ? Integer.parseInt(s) : null,(s) -> toPojoSimple(s)));
       }
       if(jsonObject.get("charNotSet")!=null) {
         log.info("Field:charNotSet:"+jsonObject.get("charNotSet"));
@@ -212,7 +220,7 @@ public class SerializationGWTJson {
       }
       if(jsonObject.get("child")!=null) {
         log.info("Field:simple:"+jsonObject.get("child"));
-        structure.setSimple(toPojoSimple(jsonObject.get("child").isString().stringValue()));
+        structure.setSimple(toPojoSimple(jsonObject.get("child").isObject().toString()));
       }
       if(jsonObject.get("listLong")!=null) {
         log.info("Field:listLong:"+jsonObject.get("listLong"));

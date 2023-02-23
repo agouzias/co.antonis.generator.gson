@@ -8,11 +8,11 @@ import java.lang.String;
 
 public class SerializationGWTJsonTypes {
   public static <T> T fromJson(Class<T> clazz, String json) {
-    if(clazz==PojoParent.class) {
-      return (T)SerializationGWTJson.toPojoParent(json);
-    }
     if(clazz==PojoSimple.class) {
       return (T)SerializationGWTJson.toPojoSimple(json);
+    }
+    if(clazz==PojoParent.class) {
+      return (T)SerializationGWTJson.toPojoParent(json);
     }
     if(clazz==PojoChild.class) {
       return (T)SerializationGWTJson.toPojoChild(json);

@@ -21,6 +21,7 @@ public class StructureGenerator {
         structure.setListDouble(Arrays.asList(0.1d, 0.2, null, 0.3));
         structure.setMapString(toMap(new Integer[]{1, 2, 3, 4}, new String[]{"a", "b", null, "d"}));
         structure.setSimple(generatePojoSimple());
+        structure.setMapChild(toMap(new Integer[]{11,12},new PojoSimple[]{null,generatePojoSimple()}));
         return structure;
     }
 

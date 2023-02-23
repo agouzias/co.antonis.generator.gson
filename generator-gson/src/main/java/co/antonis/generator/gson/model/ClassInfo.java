@@ -1,6 +1,6 @@
 package co.antonis.generator.gson.model;
 
-import co.antonis.generator.gson.gwt.CodeGeneratorUtilities;
+import co.antonis.generator.gson.Utilities;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public class ClassInfo {
     String methodToJson;
 
     public ClassInfo(Class<?> clazz, List<FieldInfo> listFieldInfo) {
-        this(clazz, listFieldInfo, CodeGeneratorUtilities.generateMethodName(clazz, true), CodeGeneratorUtilities.generateMethodName(clazz, false));
+        this(clazz, listFieldInfo, Utilities.generateMethodName(clazz, true), Utilities.generateMethodName(clazz, false));
     }
 
     public ClassInfo(Class<?> clazz, List<FieldInfo> listFieldInfo, String methodFromJson, String methodToJson) {
@@ -30,8 +30,12 @@ public class ClassInfo {
         return methodFromJson;
     }
 
-    public String fromJson(String paramName) {
+    public String methodFromJson(String paramName) {
         return methodFromJson + "(" + paramName + ")";
+    }
+
+    public String methodToJson(String paramName) {
+        return methodToJson + "(" + paramName + ")";
     }
 
     public String getMethodToJson() {

@@ -1,11 +1,12 @@
 package co.antonis.generator.gson.model;
 
+import co.antonis.generator.gson.Utilities;
 import co.antonis.generator.gson.gwt.CodeGenerator;
-import co.antonis.generator.gson.gwt.CodeGeneratorUtilities;
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 public class FieldInfo {
     public String nameSerializable;
@@ -25,19 +26,18 @@ public class FieldInfo {
     }
 
     public String nameUpper() {
-        return CodeGeneratorUtilities.toUpperFirstLtr(nameField);
+        return Utilities.toUpperFirstLtr(nameField);
     }
 
-
-    public boolean isSupportedPrimitive() {
-        return CodeGenerator.mapConvert_StringToValue.containsKey(fieldClass);
+    public boolean isSupportedPrimitive(Map<Class<?>, MethodConvert<?>> map) {
+        return map.containsKey(fieldClass);
     }
 
-    public boolean isSupportedContainer() {
-        return CodeGenerator.ListClass_SupportedContainers.contains(fieldClass);
+    public boolean isSupportedContainer(List<Class<?>> list) {
+        return list.contains(fieldClass);
     }
 
-    public ClassInfo isInPojo(List<ClassInfo> list){
+    public ClassInfo isPojo(List<ClassInfo> list){
         for(ClassInfo cI:list){
             if(fieldClass==cI.classToSerialize)
                 return cI;
@@ -48,6 +48,7 @@ public class FieldInfo {
     public String jsonObjGet() {
         return jsonObjGet("jsonObject",false);
     }
+
     public String jsonObjGet(String paramName, boolean isIncludeToString) {
         return paramName+".get(\"" + nameSerializable + "\")" + (isIncludeToString ? ".toString()" : "");
     }

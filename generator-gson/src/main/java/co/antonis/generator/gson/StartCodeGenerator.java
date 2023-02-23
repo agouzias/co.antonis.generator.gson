@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.Set;
 
 public class StartCodeGenerator {
+
     public static void main(String args[]) throws Exception {
         Set<Class<?>> st_guava = ReaderJava.listClassesOfPackage_GoogleGuice("co.antonis.gwt.gson.pojo");
         Set<Class<?>> st_class = ReaderJava.listClass(
@@ -20,7 +21,7 @@ public class StartCodeGenerator {
                 .setGeneratedClassNameSingle("SerializationGWTJson")
                 .setGeneratedPackageName("co.antonis.gwt.example.client.generated")
                 //.setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\apps\\co.antonis.gwt\\webapp-rest\\src\\main\\java\\"))
-                .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\git\\co.antonis.generator\\webapp-gwt-rest\\src\\main\\java"))
+                .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\git\\co.antonis.generator\\sample-gwt-app\\src\\main\\java"))
                 .build(st_class);
     }
 }

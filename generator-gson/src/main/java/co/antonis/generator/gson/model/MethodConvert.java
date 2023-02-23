@@ -35,7 +35,7 @@ public class MethodConvert<C> {
         this.funcFromStringToClass = functionIf;
     }
 
-    public String inline(String name) {
+    public String inlineFromStringToClass(String name) {
         if (inlineFromStringToClass != null)
             return inlineFromStringToClass.replace("$$$", name);
         return null;

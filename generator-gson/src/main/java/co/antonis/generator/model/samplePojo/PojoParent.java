@@ -70,6 +70,10 @@ public class PojoParent {
     @SerializedName("child")
     PojoSimple simple;
 
+    @Expose
+    @SerializedName("mapChild")
+    Map<Integer,PojoSimple> mapChild;
+
     public static class PojoParentInner {
         @Expose
         @SerializedName("stringB")
@@ -224,6 +228,14 @@ public class PojoParent {
         this.simple = simple;
     }
 
+    public Map<Integer, PojoSimple> getMapChild() {
+        return mapChild;
+    }
+
+    public void setMapChild(Map<Integer, PojoSimple> mapChild) {
+        this.mapChild = mapChild;
+    }
+
     @Override
     public String toString() {
         String prefix = "\r\n";
@@ -242,9 +254,10 @@ public class PojoParent {
                 prefix+", charA=" + charA +
                 prefix+", charNotSet=" + charNotSet +
                 prefix+", listAny=" + listAny +
-                prefix+", mapString=" + mapString +
+                prefix+", mapString=" + StructureGenerator.toString(mapString) +
                 prefix+", pojoType=" + pojoType +
                 prefix+", pojoSimple=" + simple +
+                prefix+", mapChild=" + StructureGenerator.toString(mapChild) +
                 '}';
     }
 }

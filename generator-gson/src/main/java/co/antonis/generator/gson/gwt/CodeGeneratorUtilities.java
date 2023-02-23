@@ -1,6 +1,7 @@
 package co.antonis.generator.gson.gwt;
 
 import co.antonis.generator.gson.model.ClassInfo;
+import co.antonis.generator.gson.model.FieldInfo;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
@@ -12,7 +13,6 @@ public class CodeGeneratorUtilities {
     public static TypeSpec generate_javaCodeTypes(CodeGenerator codeGenerator, String name) {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(name).addModifiers(Modifier.PUBLIC);
         classBuilder.addMethod(CodeGeneratorUtilities.generateCode_FromJson_For_All_POJO_Method(codeGenerator));
-
         return classBuilder.build();
     }
 
@@ -41,6 +41,9 @@ public class CodeGeneratorUtilities {
                 .addCode(methodToDate_FromString, new HashMap<>()).build());
     }
 
+    /**
+     * Generate Method, [public static <T> T fromJson(Class<T>, String){}]
+     */
     public static MethodSpec generateCode_FromJson_For_All_POJO_Method(CodeGenerator codeGenerator) {
         String parameterNameClass = "clazz";
         String parameterNameJson = "json";
@@ -62,7 +65,7 @@ public class CodeGeneratorUtilities {
         CodeBlock.Builder builder = CodeBlock.builder();
         for (ClassInfo classI : codeGenerator.listClass_Generated) {
             builder.beginControlFlow("if(" + parameterNameClass + "==$T.class)", classI.getClassToSerialize());
-            builder.addStatement("return (T)$T." + classI.fromJson(parameterNameJson), classNameOfGenerated);
+            builder.addStatement("return (T)$T." + classI.methodFromJson(parameterNameJson), classNameOfGenerated);
             builder.endControlFlow();
         }
         builder.addStatement("return null");
@@ -71,53 +74,40 @@ public class CodeGeneratorUtilities {
         return method.build();
     }
 
+    static String methodToDate_FromString
+            = "if(jsonDate == null)\n" +
+              "    return null;\n" +
+              " //the toString() add quotes\n" +
+              " jsonDate = jsonDate.replaceAll(\"\\\"\",\"\");\n" +
+              "try {\n" +
+              "    return new java.util.Date(Long.parseLong(jsonDate));\n" +
+              "} catch (Exception ignored) {}\n" +
+              "try {\n" +
+              "    return dateFormat_ISO8601.parse(jsonDate);\n" +
+              "} catch (Exception ignored){}\n" +
+              "return dateFormat_Original.parse(jsonDate);\n";
 
-    //region Static Utilities
-    public static String toUpperFirstLtr(String str) {
-        if (str != null && str.length() > 0)
-            return str.substring(0, 1).toUpperCase() + str.substring(1);
-        return null;
+    static String methodToDate_FromJsonValue
+            = "if (jsonDate == null)\n" +
+              "    return null;\n" +
+              "if (jsonDate.isNumber() != null)\n" +
+              "    try {\n" +
+              "        return new java.util.Date((long) jsonDate.isNumber().doubleValue());\n" +
+              "    } catch (Exception ignored) {\n" +
+              "    }\n" +
+              "if (jsonDate.isString() != null) {\n" +
+              "    try {\n" +
+              "        return dateFormat_ISO8601.parse(jsonDate.isString().stringValue());\n" +
+              "    } catch (Exception ignored) {\n" +
+              "    }\n" +
+              "    return dateFormat_Original.parse(jsonDate.isString().stringValue());\n" +
+              "}\n" +
+              "throw new RuntimeException(\"Unable to convert date from json \"+jsonDate);\n";
+
+
+    public static String toComment_Warning(FieldInfo fI, String extra) {
+        return "//TODO Warning, [" + fI.nameField + "][" + fI.fieldClass + "] NOT serialized " + (extra != null ? extra : "");
     }
 
-    public static String generateMethodName(Class<?> clazz, boolean isFromJson) {
-        if (isFromJson) {
-            return "to" + clazz.getSimpleName().replace("$", "_");
-        } else {
-            return "from" + clazz.getSimpleName().replace("$", "_");
-        }
-    }
-    //endregion
-
-    static String methodToDate_FromString = """
-        if(jsonDate == null)
-            return null;
-         //the toString() add quotes    
-         jsonDate = jsonDate.replaceAll("\\"","");
-        try {
-            return new java.util.Date(Long.parseLong(jsonDate));
-        } catch (Exception ignored) {}
-        try {
-            return dateFormat_ISO8601.parse(jsonDate);
-        }catch(Exception ignored){}
-        return dateFormat_Original.parse(jsonDate);
-                """;
-
-    static String methodToDate_FromJsonValue = """
-        if (jsonDate == null)
-            return null;
-        if (jsonDate.isNumber() != null)
-            try {
-                return new java.util.Date((long) jsonDate.isNumber().doubleValue());
-            } catch (Exception ignored) {
-            }
-        if (jsonDate.isString() != null) {
-            try {
-                return dateFormat_ISO8601.parse(jsonDate.isString().stringValue());
-            } catch (Exception ignored) {
-            }
-            return dateFormat_Original.parse(jsonDate.isString().stringValue());
-        }
-        throw new RuntimeException("Unable to convert date from json "+jsonDate);
-                """;
 
 }

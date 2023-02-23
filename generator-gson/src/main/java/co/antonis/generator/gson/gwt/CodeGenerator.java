@@ -1,10 +1,12 @@
 package co.antonis.generator.gson.gwt;
 
+import co.antonis.generator.gson.Utilities;
 import co.antonis.generator.gson.model.MethodConvert;
 import co.antonis.generator.gson.ReaderJava;
 import co.antonis.generator.gson.model.ClassInfo;
 import co.antonis.generator.gson.model.FieldInfo;
 import co.antonis.generator.gson.model.PairStructure;
+import com.google.common.reflect.TypeParameter;
 import com.google.gson.annotations.Expose;
 import com.squareup.javapoet.*;
 
@@ -16,6 +18,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.io.File;
+import java.util.stream.Collectors;
 
 /**
  * Get a Set<Class> and export a Java serialization (convert methods) code from/to Json
@@ -92,10 +95,12 @@ public class CodeGenerator {
         mapConvert_StringToValue.put(Character.class, MethodConvert.i(Character.class, "$$$.isString().stringValue().charAt(0)", "(s)->s!=null ? Character.valueOf(s): null"));
         mapConvert_StringToValue.put(char.class, MethodConvert.i(char.class, "$$$.isString().stringValue().charAt(0)", "(s)-> s!=null ? Character.valueOf(s) : ''"));
 
-        mapConvert_StringToValue.put(Object.class, MethodConvert.i(Object.class, "$$$.asObject().toString()", "(s)-> s!=null ? $$$ : ''"));
+        //Special Case / Special Handling
     }
 
-    public static List<Class<?>> ListClass_SupportedContainers = Arrays.asList(List.class, Map.class);
+    MethodConvert<Object> methodConvert_ofPojo = MethodConvert.i(Object.class, "$$$.isObject().toString()", "(s)-> s!=null ? $$$ : ''");
+
+    public static List<Class<?>> listClass_SupportedContainers = Arrays.asList(List.class, Map.class);
     //endregion
 
 
@@ -154,28 +159,43 @@ public class CodeGenerator {
     }
     //endregion
 
-    //region Code Generation
+    //region Methods To Json
 
-
-    public static CodeBlock generatedCode_ToJson_Method(Class<?> clazz, List<FieldInfo> listFields) {
-        CodeBlock.Builder codeBlock = CodeBlock
-                .builder();
+    /**
+     * Generate method "toJson(Pojo)" of the input ClassInfo
+     * Loop all the listed fields
+     *
+     * @param cI, the input ClassInfo to create the method
+     * @return the generated code-block of the method
+     */
+    public static CodeBlock generatedCode_ToJson_Method(ClassInfo cI) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
 
         codeBlock.addStatement("return \"TODO\"");
         return codeBlock.build();
     }
+    //endregion
 
-    /*
-     * Code Block
+    //region Method From Json
+
+    /**
+     * Generate method "fromJson(Class, String)" of the input ClassInfo
+     * Loop all the listed fields
+     *
+     * @param cI, the input ClassInfo to create the method
+     * @return the generated code-block of the method
      */
-    public CodeBlock generateCode_FromJson_Method(Class<?> clazz, List<FieldInfo> listFields) {
+    public CodeBlock generateCode_FromJson_Method(ClassInfo cI) {
+        Utilities.log.info("Class [" + cI.getClassToSerialize() + "]");
+
+        List<FieldInfo> listFields = cI.getListFieldInfo();
 
         CodeBlock.Builder codeBlock = CodeBlock
                 .builder()
                 .addStatement("$T jsonValue = $T.parseStrict(json)", classJsonValue, classJsonParser)
                 .addStatement("$T jsonObject = jsonValue.isObject()", classJsonObject)
                 .beginControlFlow("\r\nif (jsonObject != null) ")
-                .addStatement("$T structure = new $T()", clazz, clazz);
+                .addStatement("$T structure = new $T()", cI.getClassToSerialize(), cI.getClassToSerialize());
 
         //For ALL exposed fields
         listFields.forEach((field -> {
@@ -190,78 +210,55 @@ public class CodeGenerator {
         return codeBlock.build();
     }
 
-    public static PairStructure<CodeBlock.Builder,Boolean> generatedCode_FromJson_SetField_Container(FieldInfo fI) {
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-        boolean isImplemented = true;
-        if (fI.field.getGenericType() instanceof ParameterizedType typeGeneric) {
-            Type[] arguments = typeGeneric.getActualTypeArguments();
 
-            if (fI.fieldClass == List.class) {
-
-                //structure.setMember( SerializerGWT.toList( jsonObject.get("listString"), (s)->s.toString()) );
-                String methodConvert_item = mapConvert_StringToValue.get((Class<?>) arguments[0]).funcFromStringToClass;
-                codeBlock.addStatement(fI.structureSet("$T.toListFromS(" + fI.jsonObjGet() + "," + methodConvert_item + ")"), classUtilities);
-
-            } else if (fI.fieldClass == Map.class) {
-
-                String methodConvert_key = mapConvert_StringToValue.get((Class<?>) arguments[0]).funcFromStringToClass;
-                String methodConvert_value = mapConvert_StringToValue.get((Class<?>) arguments[1]).funcFromStringToClass;
-                codeBlock.addStatement(fI.structureSet("$T.toMapFromS(" + fI.jsonObjGet() + "," + methodConvert_key + "," + methodConvert_value + ")"), classUtilities);
-
-            } else {
-                //Not Supported Info
-                codeBlock.addStatement(to_warning(fI, "Not type parameters in container"));
-                isImplemented = false;
-            }
-
-        } else {
-
-            codeBlock.addStatement(to_warning(fI, "Not supported container"));
-            isImplemented = false;
-
-        }
-
-        return PairStructure.n(codeBlock,isImplemented);
-    }
-
-    public static String to_warning(FieldInfo fI, String extra) {
-        return "//TODO Warning, [" + fI.nameField + "][" + fI.fieldClass + "] NOT serialized " + (extra != null ? extra : "");
-    }
-
+    /**
+     * Generate code to set field of a pojo.
+     * Check the type of the field (primitive, container, pojo, enum)
+     * and generate the correct setXXX(....)
+     *
+     * @param fI, the fieldInfo to set
+     * @return the generated code block
+     */
     public CodeBlock generateCode_FromJson_SetField(FieldInfo fI) {
+        Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
+
         CodeBlock.Builder codeBlockWrapper = CodeBlock.builder();
         CodeBlock.Builder codeBlockAssignment = null;
 
         boolean isImplemented = true;
-        if (fI.isSupportedPrimitive()) {
+        if (fI.isSupportedPrimitive(mapConvert_StringToValue)) {
 
             /*
              * A. Case Primitive Type
              */
             /*Generated [structure.setFieldName(SerializerGWT.toString(jsonObject.get("string")))]*/
 
-            //Using Inline function of JSOV to Primitive
-            String convertCode = mapConvert_StringToValue.get(fI.fieldClass).inline(fI.jsonObjGet());
+            //Using Inline function of JSON to Primitive
+            String convertCode = mapConvert_StringToValue.get(fI.fieldClass).inlineFromStringToClass(fI.jsonObjGet());
             if (convertCode == null) {
-                convertCode = "TODO ?";
+                convertCode = "//Not implemented. Consider to add it manually or ignore";
             }
 
             codeBlockAssignment = CodeBlock.builder().addStatement("structure.set" + fI.nameUpper() + "(" + convertCode + ")", classUtilities);
 
-        } else if (fI.isInPojo(listClass_Generated) != null) {
-
-            ClassInfo cI_of_Field = fI.isInPojo(listClass_Generated);
-            String convertToString = mapConvert_StringToValue.get(String.class).inline(fI.jsonObjGet());
-            String convertCode = cI_of_Field.fromJson(convertToString);
-            codeBlockAssignment = CodeBlock.builder().addStatement("structure.set" + fI.nameUpper() + "(" + convertCode + ")", classUtilities);
-
-        } else if (fI.isSupportedContainer()) {
+        } else if (fI.isPojo(listClass_Generated) != null) {
 
             /*
-             * B. Case Container of Primitive or Supported Types
+             * B. Pojo, the field is another pojo, use a 'fromJson(String)' to convert it.
              */
-            //structure.setListString(SerializerGWT.toList(jsonObject.get("listString"), (s)->s.toString()));
-            PairStructure<CodeBlock.Builder,Boolean> pair = generatedCode_FromJson_SetField_Container(fI);
+
+            ClassInfo cI_of_Field = fI.isPojo(listClass_Generated);
+            String convertCode = cI_of_Field.methodFromJson(methodConvert_ofPojo.inlineFromStringToClass(fI.jsonObjGet()));
+            codeBlockAssignment = CodeBlock.builder().addStatement("structure.set" + fI.nameUpper() + "(" + convertCode + ")", classUtilities);
+
+        } else if (fI.isSupportedContainer(listClass_SupportedContainers)) {
+
+            /*
+             * C. Case Container of Primitive or Supported Types
+             */
+
+            //Using lamdba function to convert containers. like: structure.setListString(SerializerGWT.toList(jsonObject.get("listString"), (s)->s.toString()));
+            PairStructure<CodeBlock.Builder, Boolean> pair = generatedCode_FromJson_SetField_Container(fI);
             codeBlockAssignment = pair.getFirst();
             isImplemented = pair.getSecond();
 
@@ -270,7 +267,8 @@ public class CodeGenerator {
             /*
              * C. Case Enum
              */
-            String convertCode = mapConvert_StringToValue.get(String.class).inline(fI.jsonObjGet());
+
+            String convertCode = mapConvert_StringToValue.get(String.class).inlineFromStringToClass(fI.jsonObjGet());
             codeBlockAssignment = CodeBlock.builder().addStatement(fI.structureSet("$T.valueOf(" + convertCode + ")"), fI.fieldClass);
 
         } else {
@@ -278,7 +276,8 @@ public class CodeGenerator {
             /*
              * D. Not Supported
              */
-            codeBlockWrapper.addStatement(to_warning(fI, "Not supported type"));
+
+            codeBlockWrapper.addStatement(CodeGeneratorUtilities.toComment_Warning(fI, "Not supported type"));
             isImplemented = false;
         }
 
@@ -309,6 +308,77 @@ public class CodeGenerator {
     }
     //endregion
 
+    //region Methods From Json (container related)
+
+    /**
+     * Generate Code that converts From json/string to Container.
+     * The type-arguments must be checked for Primitives OR Pojo's and use the correct lamda methods
+     *
+     * @param fI, the field info of the container
+     * @return generated code that converts json to container
+     */
+    public PairStructure<CodeBlock.Builder, Boolean> generatedCode_FromJson_SetField_Container(FieldInfo fI) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        boolean isImplemented = true;
+        if (fI.field.getGenericType() instanceof ParameterizedType) {
+            ParameterizedType typeGeneric = (ParameterizedType) fI.field.getGenericType();
+            Type[] arguments = typeGeneric.getActualTypeArguments();
+
+            if (fI.fieldClass == List.class) {
+
+                //structure.setMember( SerializerGWT.toList( jsonObject.get("listString"), (s)->s.toString()) );
+                //mapConvert_StringToValue.get((Class<?>) arguments[0]).funcFromStringToClass;
+                String methodConvert_item = generateCode_LamdaFromStringToClass((Class<?>) arguments[0]);
+                codeBlock.addStatement(fI.structureSet("$T.toListFromS(" + fI.jsonObjGet() + "," + methodConvert_item + ")"), classUtilities);
+
+            } else if (fI.fieldClass == Map.class) {
+
+                //String methodConvert_key = mapConvert_StringToValue.get((Class<?>) arguments[0]).funcFromStringToClass;
+                //String methodConvert_value = mapConvert_StringToValue.get((Class<?>) arguments[1]).funcFromStringToClass;
+                System.out.println("-----------------0");
+                System.out.println(arguments[0]);
+                System.out.println("-----------------1");
+                System.out.println(arguments[1]);
+
+                String methodConvert_key = generateCode_LamdaFromStringToClass((Class<?>) arguments[0]);
+                String methodConvert_value = generateCode_LamdaFromStringToClass((Class<?>) arguments[1]);
+                codeBlock.addStatement(fI.structureSet("$T.toMapFromS(" + fI.jsonObjGet() + "," + methodConvert_key + "," + methodConvert_value + ")"), classUtilities);
+
+            } else {
+                //Not Supported Info
+                codeBlock.addStatement(CodeGeneratorUtilities.toComment_Warning(fI, "Not type parameters in container"));
+                isImplemented = false;
+            }
+
+        } else {
+
+            codeBlock.addStatement(CodeGeneratorUtilities.toComment_Warning(fI, "Not supported container"));
+            isImplemented = false;
+
+        }
+
+        return PairStructure.n(codeBlock, isImplemented);
+    }
+
+    public String generateCode_LamdaFromStringToClass(Class<?> fieldType) {
+        if (mapConvert_StringToValue.containsKey(fieldType)) {
+            //1. The type is "Primitive", find the Function<String,K> lamda function to use
+
+            return mapConvert_StringToValue.get(fieldType).funcFromStringToClass;
+        } else {
+            List<ClassInfo> cI_list = listClass_Generated.stream().filter((cI) -> cI.getClassToSerialize() == fieldType).collect(Collectors.toList());
+
+            //2. The type is "Object", find the Function<String,K> lamda function to use
+            if (cI_list.size() == 1) {
+                ClassInfo cI = cI_list.get(0);
+                String convertCode = "(s) -> " + cI.methodFromJson("s");
+                return convertCode;
+            }
+        }
+        return null;
+    }
+
+    //endregion
 
     public List<TypeSpec> generate_JavaCode(Set<Class<?>> setClasses) throws IOException {
 
@@ -323,7 +393,7 @@ public class CodeGenerator {
          * B. First Pass to gather ALL the generated classes and track the serializing methods
          */
         setClasses.forEach((classToSerialize) -> {
-            List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose).stream().map(FieldInfo::new).toList();
+            List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose).stream().map(FieldInfo::new).collect(Collectors.toList());
             if (listFieldInfo.size() > 0) {
                 listClass_Generated.add(new ClassInfo(classToSerialize, listFieldInfo));
             }
@@ -350,7 +420,7 @@ public class CodeGenerator {
                         .addParameter(String.class, "json")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(classToSerialize)
-                        .addCode(generateCode_FromJson_Method(classToSerialize, classInfo.getListFieldInfo()))
+                        .addCode(generateCode_FromJson_Method(classInfo))
                         .build();
 
                 MethodSpec method_convertToJson = MethodSpec
@@ -358,7 +428,7 @@ public class CodeGenerator {
                         .addParameter(classToSerialize, "structure")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(String.class)
-                        .addCode(generatedCode_ToJson_Method(classToSerialize, classInfo.getListFieldInfo()))
+                        .addCode(generatedCode_ToJson_Method(classInfo))
                         .build();
 
                 listMethodsFromJson.add(method_convertFromJson);
