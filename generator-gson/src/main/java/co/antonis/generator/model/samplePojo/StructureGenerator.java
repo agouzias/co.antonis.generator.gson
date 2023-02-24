@@ -3,8 +3,12 @@ package co.antonis.generator.model.samplePojo;
 import co.antonis.generator.model.samplePojo.sub.PojoChild;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class StructureGenerator {
+
+    public static long HOUR_MS = 60 * 60 * 1000;
+    public static long DAY_MS = 24 * HOUR_MS;
 
     public static PojoParent generatePojoParent() {
         PojoParent structure = new PojoParent();
@@ -21,7 +25,11 @@ public class StructureGenerator {
         structure.setListDouble(Arrays.asList(0.1d, 0.2, null, 0.3));
         structure.setMapString(toMap(new Integer[]{1, 2, 3, 4}, new String[]{"a", "b", null, "d"}));
         structure.setSimple(generatePojoSimple());
-        structure.setMapChild(toMap(new Integer[]{11,12},new PojoSimple[]{null,generatePojoSimple()}));
+        structure.setMapChild(toMap(new Integer[]{11, 12}, new PojoSimple[]{null, generatePojoSimple()}));
+        Map<Integer, List<PojoSimple>> mapListChild = new HashMap<>();
+        mapListChild.put(1, Arrays.<PojoSimple>asList(generatePojoSimple(), generatePojoSimple()));
+        mapListChild.put(2, Arrays.<PojoSimple>asList(generatePojoSimple(), generatePojoSimple()));
+        structure.setMapListChild(mapListChild);
         return structure;
     }
 
@@ -30,7 +38,7 @@ public class StructureGenerator {
         structure.setDateSimple(new Date());
         structure.setIntSimple(11);
         structure.setStringSimple("antonis");
-        structure.setListDateSimple(Arrays.asList(new Date(), new Date(), new Date()));
+        structure.setListDateSimple(Arrays.asList(daysBefore( (int)Math.round(Math.random()*20)), daysBefore(2), daysBefore(3)));
         return structure;
     }
 
@@ -74,16 +82,16 @@ public class StructureGenerator {
     }
 
     public static String toString(Map map) {
-        return toString(map, "\r\n");
+        return toString(map, Object::toString, "\r\n");
     }
 
-    public static String toString(Map<?, ?> map, String separator) {
+    public static <T> String toString(Map<?, T> map, Function<T, String> printer, String separator) {
         if (map == null)
             return "n/a";
         StringBuilder strB = new StringBuilder();
         for (Object key : map.keySet()) {
             strB.append("{").append(key).append("}");
-            strB.append("{").append(map.get(key)).append("}");
+            strB.append("{").append(printer.apply(map.get(key))).append("}");
             strB.append(separator);
         }
         return strB.toString();
@@ -94,5 +102,9 @@ public class StructureGenerator {
         for (int i = 0; i < k.length; i++)
             map.put(k[i], v[i]);
         return map;
+    }
+
+    public static Date daysBefore(int days) {
+        return new Date(System.currentTimeMillis() - (days * DAY_MS));
     }
 }

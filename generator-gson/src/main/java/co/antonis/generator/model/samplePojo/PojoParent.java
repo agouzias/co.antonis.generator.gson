@@ -72,7 +72,10 @@ public class PojoParent {
 
     @Expose
     @SerializedName("mapChild")
-    Map<Integer,PojoSimple> mapChild;
+    Map<Integer, PojoSimple> mapChild;
+    @Expose
+    @SerializedName("mapListChild")
+    Map<Integer, List<PojoSimple>> mapListChild;
 
     public static class PojoParentInner {
         @Expose
@@ -236,28 +239,36 @@ public class PojoParent {
         this.mapChild = mapChild;
     }
 
+    public Map<Integer, List<PojoSimple>> getMapListChild() {
+        return mapListChild;
+    }
+
+    public void setMapListChild(Map<Integer, List<PojoSimple>> mapListChild) {
+        this.mapListChild = mapListChild;
+    }
+
     @Override
     public String toString() {
         String prefix = "\r\n";
         return "PojoParent{" +
-                prefix+"date=" + date +
-                prefix+", string='" + string + '\'' +
-                prefix+", stringNotSet='" + stringNotSet + "\' is null:" + (stringNotSet==null)+
-                prefix+", numberInt=" + numberInt +
-                prefix+", numberDouble=" + numberDouble +
-                prefix+", booleanValue=" + booleanValue +
-                prefix+", numberLong=" + numberLong +
-                prefix+", numberLongClass=" + numberLongClass +
-                prefix+", listString=" + listString +
-                prefix+", listLong=" + listLong +
-                prefix+", listDouble=" + listDouble +
-                prefix+", charA=" + charA +
-                prefix+", charNotSet=" + charNotSet +
-                prefix+", listAny=" + listAny +
-                prefix+", mapString=" + StructureGenerator.toString(mapString) +
-                prefix+", pojoType=" + pojoType +
-                prefix+", pojoSimple=" + simple +
-                prefix+", mapChild=" + StructureGenerator.toString(mapChild) +
+                prefix + "date=" + date +
+                prefix + ", string='" + string + '\'' +
+                prefix + ", stringNotSet='" + stringNotSet + "\' is null:" + (stringNotSet == null) +
+                prefix + ", numberInt=" + numberInt +
+                prefix + ", numberDouble=" + numberDouble +
+                prefix + ", booleanValue=" + booleanValue +
+                prefix + ", numberLong=" + numberLong +
+                prefix + ", numberLongClass=" + numberLongClass +
+                prefix + ", listString=" + listString +
+                prefix + ", listLong=" + listLong +
+                prefix + ", listDouble=" + listDouble +
+                prefix + ", charA=" + charA +
+                prefix + ", charNotSet=" + charNotSet +
+                prefix + ", listAny=" + listAny +
+                prefix + ", mapString=" + StructureGenerator.toString(mapString) +
+                prefix + ", pojoType=" + pojoType +
+                prefix + ", pojoSimple=" + simple +
+                prefix + ", mapChild=" + StructureGenerator.toString(mapChild) +
                 '}';
     }
 }
