@@ -9,8 +9,17 @@ import java.util.List;
 import java.util.Map;
 
 public class FieldInfo {
+
+    /*
+     * The name that is used in 'json'
+     */
     public String nameSerializable;
+
+    /*
+     * The actual name as defined in class
+     */
     public String nameField;
+
 
     public Class<?> fieldClass;
     public Field field;
@@ -55,6 +64,10 @@ public class FieldInfo {
 
     public String structureSet(String value){
         return "structure.set"+nameUpper()+"("+value+")";
+    }
+
+    public String toSimpleString(){
+        return "["+nameField+"]["+fieldClass+"]";
     }
 
 }

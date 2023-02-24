@@ -19,10 +19,11 @@ public class Utilities {
 
     public static String generateMethodName(Class<?> clazz, boolean isFromJson) {
         if (isFromJson) {
-            return "to" + clazz.getSimpleName().replace("$", "_");
+            return "to" + clazz.getSimpleName().replaceAll("\\$", "_");
         } else {
-            return "from" + clazz.getSimpleName().replace("$", "_");
+            return "from" + clazz.getSimpleName().replaceAll("\\$", "_");
         }
     }
+
     //endregion
 }

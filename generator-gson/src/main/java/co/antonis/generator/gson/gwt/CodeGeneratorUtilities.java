@@ -12,7 +12,7 @@ public class CodeGeneratorUtilities {
 
     public static TypeSpec generate_javaCodeTypes(CodeGenerator codeGenerator, String name) {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(name).addModifiers(Modifier.PUBLIC);
-        classBuilder.addMethod(CodeGeneratorUtilities.generateCode_FromJson_For_All_POJO_Method(codeGenerator));
+        classBuilder.addMethod(CodeGeneratorUtilities.code_FromJson_For_All_POJO_Method(codeGenerator));
         return classBuilder.build();
     }
 
@@ -44,7 +44,7 @@ public class CodeGeneratorUtilities {
     /**
      * Generate Method, [public static <T> T fromJson(Class<T>, String){}]
      */
-    public static MethodSpec generateCode_FromJson_For_All_POJO_Method(CodeGenerator codeGenerator) {
+    public static MethodSpec code_FromJson_For_All_POJO_Method(CodeGenerator codeGenerator) {
         String parameterNameClass = "clazz";
         String parameterNameJson = "json";
 
@@ -65,9 +65,10 @@ public class CodeGeneratorUtilities {
         CodeBlock.Builder builder = CodeBlock.builder();
         for (ClassInfo classI : codeGenerator.listClass_Generated) {
             builder.beginControlFlow("if(" + parameterNameClass + "==$T.class)", classI.getClassToSerialize());
-            builder.addStatement("return (T)$T." + classI.methodFromJson(parameterNameJson), classNameOfGenerated);
+            builder.addStatement("return (T)$T." + classI.code_methodFromJson(parameterNameJson), classNameOfGenerated);
             builder.endControlFlow();
         }
+
         builder.addStatement("return null");
         method.addCode(builder.build());
 
@@ -105,8 +106,12 @@ public class CodeGeneratorUtilities {
               "throw new RuntimeException(\"Unable to convert date from json \"+jsonDate);\n";
 
 
-    public static String toComment_Warning(FieldInfo fI, String extra) {
-        return "//TODO Warning, [" + fI.nameField + "][" + fI.fieldClass + "] NOT serialized " + (extra != null ? extra : "");
+    public static String toComment_safe(String comment) {
+        return comment.replaceAll("\\$", "_");
+    }
+
+    public static String toComment_TODO(FieldInfo fI, String extra) {
+        return toComment_safe("// TODO " + (fI != null ? fI.toSimpleString() : "") + " NOT serialized " + (extra != null ? extra : "") + "\r\n");
     }
 
 

@@ -4,8 +4,12 @@ import co.antonis.generator.gson.Utilities;
 
 import java.util.List;
 
+/**
+ * Wrapper of a "class" that needs to be serialized/deserialized,
+ */
 public class ClassInfo {
-    //The Class that is serialized
+
+    //The Class that is serialized/deserialized
     Class<?> classToSerialize;
     List<FieldInfo> listFieldInfo;
     String methodFromJson;
@@ -30,20 +34,28 @@ public class ClassInfo {
         return methodFromJson;
     }
 
-    public String methodFromJson(String paramName) {
-        return methodFromJson + "(" + paramName + ")";
-    }
-
-    public String methodToJson(String paramName) {
-        return methodToJson + "(" + paramName + ")";
-    }
 
     public String getMethodToJson() {
         return methodToJson;
     }
 
-
     public List<FieldInfo> getListFieldInfo() {
         return listFieldInfo;
     }
+
+    public String code_methodFromJson(String paramName) {
+        return methodFromJson + "(" + paramName + ")";
+    }
+
+    public String code_methodFromJson_asFunction(String paramName, String as_methodReference) {
+        if (as_methodReference == null)
+            return "(" + paramName + ") -> " + code_methodFromJson(paramName);
+        else
+            return as_methodReference + "::" + methodFromJson;
+    }
+
+    public String code_methodToJson(String paramName) {
+        return methodToJson + "(" + paramName + ")";
+    }
+
 }

@@ -83,10 +83,16 @@ public class SerializationGWTUtilities {
         return dateFormat_Original.parse(jsonDate);
     }
 
-    public static <T> List<T> toListFromS(JSONValue value, Function<String, T> convert) {
-        if (value != null) {
+    public static <T> List<T> toList_FromS(String jsonS, Function<String, T> convert) {
+        if(jsonS==null)
+            return null;
+        return toList_FromS(JSONParser.parseStrict(jsonS),convert);
+    }
+
+    public static <T> List<T> toList_FromS(JSONValue jsonV, Function<String, T> convert) {
+        if (jsonV != null) {
             List<T> listStructure = new ArrayList<>();
-            JSONArray jsonArray = value.isArray();
+            JSONArray jsonArray = jsonV.isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
                 //log.info("Item " + i + ":" + jsonArray.get(i) + " [ is null " + isNull(jsonArray.get(i)) + "][");
                 listStructure.add(convert.apply(toStringJSONValue(jsonArray.get(i))));
@@ -96,10 +102,10 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <T> List<T> toListFromV(JSONValue value, Function<JSONValue, T> convert) {
-        if (value != null) {
+    public static <T> List<T> toList_FromV(JSONValue jsonV, Function<JSONValue, T> convert) {
+        if (jsonV != null) {
             List<T> listStructure = new ArrayList<>();
-            JSONArray jsonArray = value.isArray();
+            JSONArray jsonArray = jsonV.isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
                 listStructure.add(convert.apply(jsonArray.get(i)));
             }
@@ -108,10 +114,16 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <K, V> Map<K, V> toMapFromS(JSONValue value, Function<String, K> convertKey, Function<String, V> convertValue) {
-        if (value != null) {
+    public static <K, V> Map<K, V> toMap_FromS(String jsonS, Function<String, K> convertKey, Function<String, V> convertValue) {
+        if (jsonS == null)
+            return null;
+        return toMap_FromS(JSONParser.parseStrict(jsonS), convertKey, convertValue);
+    }
+
+    public static <K, V> Map<K, V> toMap_FromS(JSONValue jsonV, Function<String, K> convertKey, Function<String, V> convertValue) {
+        if (jsonV != null) {
             Map<K, V> mapStructure = new HashMap<>();
-            JSONObject jsonObject = value.isObject();
+            JSONObject jsonObject = jsonV.isObject();
             Set<String> keys = jsonObject.keySet();
             for (String key : keys) {
                 //TODO Maybe there is unneeded check (if the value is null then probably it is not 'set' in the map, so no need to check for not null value)
@@ -122,10 +134,10 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <K, V> Map<K, V> toMapFromV(JSONValue value, Function<String, K> convertKey, Function<JSONValue, V> convertValue) {
-        if (value != null) {
+    public static <K, V> Map<K, V> toMap_FromV(JSONValue jsonV, Function<String, K> convertKey, Function<JSONValue, V> convertValue) {
+        if (jsonV != null) {
             Map<K, V> mapStructure = new HashMap<>();
-            JSONObject jsonObject = value.isObject();
+            JSONObject jsonObject = jsonV.isObject();
             Set<String> keys = jsonObject.keySet();
             for (String key : keys) {
                 mapStructure.put(convertKey.apply(key), convertValue.apply(jsonObject.get(key)));
@@ -137,14 +149,14 @@ public class SerializationGWTUtilities {
 
     /**
      * Wrong Way:
-     * !isNull(v) ? v.toString() : null));
+     * !isNull(v) ? v.toString() : null;
      * <p>
-     * Correct Way :The "string" json value is quoted. the proper way is to use "isString().stringValue()"
+     * Correct Way :The "string" json value is quoted. the proper way is to use
+     * !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null
      */
     public static String toStringJSONValue(JSONValue v) {
         return !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null;
     }
-
 
 
     public static boolean isNull(JSONValue obj) {
