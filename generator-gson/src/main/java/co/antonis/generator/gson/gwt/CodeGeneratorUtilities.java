@@ -46,7 +46,22 @@ public class CodeGeneratorUtilities {
      */
     public static TypeSpec generate_javaCodeTypes(CodeGenerator codeGenerator, String name) {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(name).addModifiers(Modifier.PUBLIC);
+
+        //1. Add All serialized classes
+        TypeName classType = ArrayTypeName.of(Class.class);
+        CodeBlock.Builder codeBlockInitializer = CodeBlock.builder().add("new Class<?>[] {\n");
+        for (ClassInfo classI : codeGenerator.listClassInfo)
+            codeBlockInitializer.add("$T.class,\n", classI.getClassToSerialize());
+        codeBlockInitializer.add("}");
+
+        FieldSpec.Builder fieldSpec = FieldSpec.builder(classType, "classes", Modifier.PUBLIC, Modifier.STATIC);
+        fieldSpec.initializer(codeBlockInitializer.build());
+        classBuilder.addField(fieldSpec.build());
+
+        //2. Add method "fromJson"
         classBuilder.addMethod(CodeGeneratorUtilities.code_FromJson_For_All_POJO_Method(codeGenerator));
+
+
         return classBuilder.build();
     }
 
@@ -113,6 +128,7 @@ public class CodeGeneratorUtilities {
 
         builder.addStatement("return null");
         method.addCode(builder.build());
+
 
         return method.build();
     }

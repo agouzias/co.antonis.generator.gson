@@ -27,19 +27,29 @@ public class StructureGenerator {
         structure.setSimple(generatePojoSimple());
         structure.setMapChild(toMap(new Integer[]{11, 12}, new PojoSimple[]{null, generatePojoSimple()}));
 
+
+        structure.setMapListChild(generateMapOfList());
+
+        List<Map<Integer,List<PojoSimple>>> list = new ArrayList<>();
+        list.add(generateMapOfList());
+        list.add(generateMapOfList());
+        list.add(generateMapOfList());
+        structure.setListMapChild(list);
+
+        return structure;
+    }
+
+    public static Map<Integer, List<PojoSimple>> generateMapOfList(){
         Map<Integer, List<PojoSimple>> mapListChild = new HashMap<>();
         mapListChild.put(1, Arrays.<PojoSimple>asList(generatePojoSimple(), generatePojoSimple()));
         mapListChild.put(2, Arrays.<PojoSimple>asList(generatePojoSimple(), generatePojoSimple()));
-        structure.setMapListChild(mapListChild);
-
-
-        return structure;
+        return mapListChild;
     }
 
     public static PojoSimple generatePojoSimple() {
         PojoSimple structure = new PojoSimple();
         structure.setDateSimple(new Date());
-        structure.setIntSimple(11);
+        structure.setIntSimple( Double.valueOf(Math.ceil(Math.random()*50)).intValue() );
         structure.setStringSimple("antonis");
         structure.setListDateSimple(Arrays.asList(daysBefore( (int)Math.round(Math.random()*20)), daysBefore(2), daysBefore(3)));
         return structure;

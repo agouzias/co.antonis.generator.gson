@@ -1,6 +1,7 @@
 package co.antonis.gwt.example.client.ui;
 
 import co.antonis.generator.model.sample.PojoParent;
+import co.antonis.gwt.example.client.generated.SerializationGWTJson_Sample;
 import co.antonis.gwt.example.client.ui.components.ace.AceTextAreaView;
 import co.antonis.gwt.example.client.service.RestClientGWT;
 import co.antonis.gwt.example.client.utilities.Log;
@@ -56,17 +57,15 @@ public class UiPanelRequest extends Composite {
         uiContainerTextConverted.add(uiTextConvertedStructure);
     }
 
-
     @UiHandler("buttonConvert")
     public void buttonSubmitConvert(ClickEvent event) {
         log.info("Converting json of text [" + uiTextResponseBody.getText() + "]");
         long start = System.currentTimeMillis();
-        PojoParent pojoParent = SerializationGWTJson.toPojoParent(uiTextResponseBody.getText());
+        PojoParent pojoParent = SerializationGWTJson_Sample.toPojoParent(uiTextResponseBody.getText());
         long diff = System.currentTimeMillis() - start;
-        log.info("Diff Convertion:"+diff+"ms");
+        log.info("Diff Convert:"+diff+"ms");
         uiTextConvertedStructure.setText(pojoParent.toString());
     }
-
 
     @UiHandler("buttonSubmit")
     public void buttonSubmitClick(ClickEvent event) {

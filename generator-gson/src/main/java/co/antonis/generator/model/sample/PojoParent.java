@@ -294,6 +294,7 @@ public class PojoParent {
                prefix + ", pojoSimple=" + simple +
                prefix + ", listPojoType=" + StructureGenerator.toString(listPojoType) +
                prefix + ", mapChild=" + StructureGenerator.toString(mapChild) +
+               prefix + ", listMapChild=" + StructureGenerator.toString(listMapChild) +
                '}';
     }
 }

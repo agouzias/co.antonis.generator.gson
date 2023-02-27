@@ -47,9 +47,6 @@ public class UiPanelConvert extends Composite {
     public void onButtonToJson(ClickEvent event) {
         log.info("Converting To Json of auto generated structure [" + uiTextStructure.getText() + "]");
         PojoParent structure = StructureGenerator.generatePojoParent();
-        InfoMessageStructure info = SerializationGWTUtilities.toInfoMessageStructure(uiTextStructure.getText());
-        log.info("Output " + info.toString(false));
-        uiTextJson.setText(info.toString(false));
     }
 
 }

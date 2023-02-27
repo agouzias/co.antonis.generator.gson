@@ -497,7 +497,7 @@ public class CodeGenerator {
         return MapConverters.get(clazz);
     }
 
-    static String prefix_In_Container = "\n" /*"\n"*/;
+    static String prefix_In_Container = "" /*"\n"*/;
 
     static String code_toList_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_from_s) {
         return prefix_In_Container + "$T.toList"+(isParamJsonValue?"Json":"String")+"_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
@@ -509,11 +509,11 @@ public class CodeGenerator {
      * @param isParamJsonValue
      * @param param
      * @param convertMethod_key_from_s
-     * @param convertMethod_v_from_s
+     * @param convertMethod_value_from_s
      * @return
      */
-    static String code_toMap_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_key_from_s, String convertMethod_v_from_s) {
-        return prefix_In_Container + "$T.toMap"+(isParamJsonValue?"Json":"String")+"_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_v_from_s + ")\n";
+    static String code_toMap_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_key_from_s, String convertMethod_value_from_s) {
+        return prefix_In_Container + "$T.toMap"+(isParamJsonValue?"Json":"String")+"_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
     }
 
     static String code_toLog(String msg) {
@@ -550,7 +550,6 @@ public class CodeGenerator {
         List<TypeSpec> listTypeBuilder = new ArrayList<>();
         mapClassGroupInfo.clear();
         listClassInfo.clear();
-
 
         /*
          * A. First Pass to gather ALL the generated classes AND the class-Names that will be used to generate the methods
