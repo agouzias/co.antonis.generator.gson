@@ -1,4 +1,4 @@
-package co.antonis.generator.model.samplePojo;
+package co.antonis.generator.model.sample;
 
 import com.google.gson.annotations.Expose;
 

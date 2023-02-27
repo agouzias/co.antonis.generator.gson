@@ -11,13 +11,13 @@ public class StartCodeGenerator {
         Set<Class<?>> st_guava = ReaderJava.listClassesOfPackage_GoogleGuice("co.antonis.gwt.gson.pojo");
 
         Set<Class<?>> set_class_basic = ReaderJava.listClass(
-                "co.antonis.generator.model.samplePojo.PojoParent",
-                "co.antonis.generator.model.samplePojo.PojoSimple",
-                "co.antonis.generator.model.samplePojo.sub.PojoChild"
+                "co.antonis.generator.model.sample.PojoParent",
+                "co.antonis.generator.model.sample.PojoSimple",
+                "co.antonis.generator.model.sample.sub.PojoChild"
         );
 
         Set<Class<?>> set_class_solo = ReaderJava.listClass(
-                "co.antonis.generator.model.samplePojo.PojoParent"
+                "co.antonis.generator.model.sample.PojoParent"
         );
 
         new CodeGenerator()
@@ -25,10 +25,10 @@ public class StartCodeGenerator {
                 .setPrintLogInfo(false)
                 .setGenerateToJsonMethods(false)
                 .setGenerateFromJsonMethods(true)
-                .setGeneratedClassNameSingle("SerializationGWTJson")
+                .setGeneratedClassName("SerializationGWTJson", true)
                 .setGeneratedPackageName("co.antonis.gwt.example.client.generated")
-                //.setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\apps\\co.antonis.gwt\\webapp-rest\\src\\main\\java\\"))
-                .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\git\\co.antonis.generator\\sample-gwt-app\\src\\main\\java"))
-                .build(set_class_solo);
+                .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\apps\\co.antonis.generator\\generator-gson-gwt\\sample-gwt-app\\src\\main\\java"))
+                //.setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\git\\co.antonis.generator\\sample-gwt-app\\src\\main\\java"))
+                .build(set_class_basic);
     }
 }

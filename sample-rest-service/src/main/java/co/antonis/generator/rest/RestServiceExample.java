@@ -1,6 +1,6 @@
 package co.antonis.generator.rest;
 
-import co.antonis.generator.model.samplePojo.StructureGenerator;
+import co.antonis.generator.model.sample.StructureGenerator;
 import co.antonis.generator.rest.serialization.SerializerJsonDateMultiValue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

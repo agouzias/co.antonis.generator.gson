@@ -24,7 +24,7 @@ public class PairStructure<F, S> implements Serializable, Comparable<PairStructu
     public PairStructure() {
     }
 
-    public static <F,S> PairStructure n(F a, S b){
+    public static <F,S> PairStructure<F,S> n(F a, S b){
         return new PairStructure<>(a,b);
     }
 

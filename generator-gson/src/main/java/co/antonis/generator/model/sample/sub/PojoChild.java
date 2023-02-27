@@ -1,6 +1,6 @@
-package co.antonis.generator.model.samplePojo.sub;
+package co.antonis.generator.model.sample.sub;
 
-import co.antonis.generator.model.samplePojo.PojoParent;
+import co.antonis.generator.model.sample.PojoParent;
 import com.google.gson.annotations.Expose;
 
 public class PojoChild extends PojoParent {

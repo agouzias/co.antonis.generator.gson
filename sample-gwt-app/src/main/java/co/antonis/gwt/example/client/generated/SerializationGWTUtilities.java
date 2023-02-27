@@ -15,6 +15,7 @@ public class SerializationGWTUtilities {
     public static DateTimeFormat dateFormat_ISO8601 = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     public static DateTimeFormat dateFormat_Original = DateTimeFormat.getFormat("MMM, d, yyyy hh:mm:ss a");
 
+    //region Primitives
     public static boolean toBoolean(JSONValue value) {
         if (value != null) {
             JSONBoolean bool = value.isBoolean();
@@ -48,7 +49,9 @@ public class SerializationGWTUtilities {
         Double number = toDouble(value);
         return number != null ? number.longValue() : null;
     }
+    //endregion
 
+    //region Date Converter
     public static Date toDateFromV(JSONValue jsonDate) {
         if (jsonDate == null)
             return null;
@@ -82,14 +85,16 @@ public class SerializationGWTUtilities {
         }
         return dateFormat_Original.parse(jsonDate);
     }
+    //endregion
 
-    public static <T> List<T> toList_FromS(String jsonS, Function<String, T> convert) {
-        if(jsonS==null)
+    //region List
+    public static <T> List<T> toListString_FuncS(String jsonS, Function<String, T> convert) {
+        if (jsonS == null)
             return null;
-        return toList_FromS(JSONParser.parseStrict(jsonS),convert);
+        return toListJson_FuncS(JSONParser.parseStrict(jsonS), convert);
     }
 
-    public static <T> List<T> toList_FromS(JSONValue jsonV, Function<String, T> convert) {
+    public static <T> List<T> toListJson_FuncS(JSONValue jsonV, Function<String, T> convert) {
         if (jsonV != null) {
             List<T> listStructure = new ArrayList<>();
             JSONArray jsonArray = jsonV.isArray();
@@ -102,7 +107,7 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <T> List<T> toList_FromV(JSONValue jsonV, Function<JSONValue, T> convert) {
+    public static <T> List<T> toListJson_FuncJ(JSONValue jsonV, Function<JSONValue, T> convert) {
         if (jsonV != null) {
             List<T> listStructure = new ArrayList<>();
             JSONArray jsonArray = jsonV.isArray();
@@ -113,14 +118,16 @@ public class SerializationGWTUtilities {
         }
         return null;
     }
+    //endregion
 
-    public static <K, V> Map<K, V> toMap_FromS(String jsonS, Function<String, K> convertKey, Function<String, V> convertValue) {
+    //region Methods Map
+    public static <K, V> Map<K, V> toMapString_FuncS(String jsonS, Function<String, K> convertKey, Function<String, V> convertValue) {
         if (jsonS == null)
             return null;
-        return toMap_FromS(JSONParser.parseStrict(jsonS), convertKey, convertValue);
+        return toMapJson_FuncS(JSONParser.parseStrict(jsonS), convertKey, convertValue);
     }
 
-    public static <K, V> Map<K, V> toMap_FromS(JSONValue jsonV, Function<String, K> convertKey, Function<String, V> convertValue) {
+    public static <K, V> Map<K, V> toMapJson_FuncS(JSONValue jsonV, Function<String, K> convertKey, Function<String, V> convertValue) {
         if (jsonV != null) {
             Map<K, V> mapStructure = new HashMap<>();
             JSONObject jsonObject = jsonV.isObject();
@@ -134,7 +141,7 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <K, V> Map<K, V> toMap_FromV(JSONValue jsonV, Function<String, K> convertKey, Function<JSONValue, V> convertValue) {
+    public static <K, V> Map<K, V> toMapJson_FuncJ(JSONValue jsonV, Function<String, K> convertKey, Function<JSONValue, V> convertValue) {
         if (jsonV != null) {
             Map<K, V> mapStructure = new HashMap<>();
             JSONObject jsonObject = jsonV.isObject();
@@ -146,6 +153,7 @@ public class SerializationGWTUtilities {
         }
         return null;
     }
+    //endregion
 
     /**
      * Wrong Way:
@@ -161,41 +169,6 @@ public class SerializationGWTUtilities {
 
     public static boolean isNull(JSONValue obj) {
         return obj == null || obj.isNull() != null;
-    }
-
-
-    public static Date toDate(JSONValue date) {
-        if (date.isNull() != null)
-            return null;
-
-        JSONNumber jsonNumber = date.isNumber();
-        if (jsonNumber != null) {
-            return new Date((long) jsonNumber.doubleValue());
-        }
-
-        JSONString jsonString = date.isString();
-        if (jsonString != null) {
-            //TODO formatting
-            return new Date();
-        }
-
-        return null;
-    }
-
-    public static InfoMessageStructure toInfoMessageStructure(String json) {
-        JSONArray jsonArray;
-        JSONString jsonString;
-
-        JSONValue jsonValue = JSONParser.parseStrict(json);
-        JSONObject jsonObject = jsonValue.isObject();
-        InfoMessageStructure result = null;
-        if (jsonObject != null) {
-            result = new InfoMessageStructure();
-            result.setMessage(toString(jsonObject.get("msg")));
-            result.setType(toInt(jsonObject.get("t")));
-            result.setMessageExtended(toString(jsonObject.get("mse")));
-        }
-        return result;
     }
 
 

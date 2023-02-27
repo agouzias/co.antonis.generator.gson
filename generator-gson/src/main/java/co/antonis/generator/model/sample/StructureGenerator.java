@@ -1,6 +1,6 @@
-package co.antonis.generator.model.samplePojo;
+package co.antonis.generator.model.sample;
 
-import co.antonis.generator.model.samplePojo.sub.PojoChild;
+import co.antonis.generator.model.sample.sub.PojoChild;
 
 import java.util.*;
 import java.util.function.Function;
@@ -26,10 +26,13 @@ public class StructureGenerator {
         structure.setMapString(toMap(new Integer[]{1, 2, 3, 4}, new String[]{"a", "b", null, "d"}));
         structure.setSimple(generatePojoSimple());
         structure.setMapChild(toMap(new Integer[]{11, 12}, new PojoSimple[]{null, generatePojoSimple()}));
+
         Map<Integer, List<PojoSimple>> mapListChild = new HashMap<>();
         mapListChild.put(1, Arrays.<PojoSimple>asList(generatePojoSimple(), generatePojoSimple()));
         mapListChild.put(2, Arrays.<PojoSimple>asList(generatePojoSimple(), generatePojoSimple()));
         structure.setMapListChild(mapListChild);
+
+
         return structure;
     }
 

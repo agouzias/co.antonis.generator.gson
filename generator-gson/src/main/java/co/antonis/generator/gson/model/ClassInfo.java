@@ -1,6 +1,8 @@
 package co.antonis.generator.gson.model;
 
 import co.antonis.generator.gson.Utilities;
+import co.antonis.generator.gson.gwt.CodeGenerator;
+import co.antonis.generator.gson.gwt.CodeGeneratorUtilities;
 
 import java.util.List;
 
@@ -10,18 +12,24 @@ import java.util.List;
 public class ClassInfo {
 
     //The Class that is serialized/deserialized
+    String generatedClassName;
     Class<?> classToSerialize;
     List<FieldInfo> listFieldInfo;
     String methodFromJson;
     String methodToJson;
 
-    public ClassInfo(Class<?> clazz, List<FieldInfo> listFieldInfo) {
-        this(clazz, listFieldInfo, Utilities.generateMethodName(clazz, true), Utilities.generateMethodName(clazz, false));
+    public ClassInfo(Class<?> clazz, List<FieldInfo> listFieldInfo, String generatedClassName) {
+        this(clazz,
+                listFieldInfo,
+                generatedClassName,
+                Utilities.generateMethodName(clazz, true),
+                Utilities.generateMethodName(clazz, false));
     }
 
-    public ClassInfo(Class<?> clazz, List<FieldInfo> listFieldInfo, String methodFromJson, String methodToJson) {
+    private ClassInfo(Class<?> clazz, List<FieldInfo> listFieldInfo, String generatedClassName, String methodFromJson, String methodToJson) {
         this.classToSerialize = clazz;
         this.listFieldInfo = listFieldInfo;
+        this.generatedClassName = generatedClassName;
         this.methodFromJson = methodFromJson;
         this.methodToJson = methodToJson;
     }
@@ -34,6 +42,9 @@ public class ClassInfo {
         return methodFromJson;
     }
 
+    public String getGeneratedClassName() {
+        return generatedClassName;
+    }
 
     public String getMethodToJson() {
         return methodToJson;
@@ -43,8 +54,26 @@ public class ClassInfo {
         return listFieldInfo;
     }
 
+    /**
+     * Return GeneratedClassName.fromXXXX(paramName)
+     *
+     * @param paramName
+     * @return
+     */
     public String code_methodFromJson(String paramName) {
-        return methodFromJson + "(" + paramName + ")";
+        return code_methodFromJson(paramName, true);
+    }
+
+    /**
+     * Return
+     * 1. GeneratedClassName.fromXXXX(paramName)
+     * 2  fromXXXX(paramName)
+     *
+     * @param paramName
+     * @return
+     */
+    public String code_methodFromJson(String paramName, boolean isIncludeClassName) {
+        return (isIncludeClassName ? (generatedClassName + ".") : "") + methodFromJson + "(" + paramName + ")";
     }
 
     public String code_methodFromJson_asFunction(String paramName, String as_methodReference) {
@@ -55,7 +84,8 @@ public class ClassInfo {
     }
 
     public String code_methodToJson(String paramName) {
-        return methodToJson + "(" + paramName + ")";
+        return generatedClassName + "." + methodToJson + "(" + paramName + ")";
     }
+
 
 }

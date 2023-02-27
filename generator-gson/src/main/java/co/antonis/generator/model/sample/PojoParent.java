@@ -1,4 +1,4 @@
-package co.antonis.generator.model.samplePojo;
+package co.antonis.generator.model.sample;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -81,6 +81,9 @@ public class PojoParent {
     @Expose
     @SerializedName("mapListChild")
     Map<Integer, List<PojoSimple>> mapListChild;
+
+    @Expose
+    List<Map<Integer, List<PojoSimple>>> listMapChild;
 
     public static class PojoParentInner {
         @Expose
@@ -258,6 +261,14 @@ public class PojoParent {
 
     public void setListPojoType(List<PojoType> listPojoType) {
         this.listPojoType = listPojoType;
+    }
+
+    public List<Map<Integer, List<PojoSimple>>> getListMapChild() {
+        return listMapChild;
+    }
+
+    public void setListMapChild(List<Map<Integer, List<PojoSimple>>> listMapChild) {
+        this.listMapChild = listMapChild;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package co.antonis.gwt.example.client.ui;
 
-import co.antonis.generator.model.samplePojo.PojoParent;
-import co.antonis.gwt.example.client.generated.SerializationGWTJson;
+import co.antonis.generator.model.sample.PojoParent;
 import co.antonis.gwt.example.client.ui.components.ace.AceTextAreaView;
 import co.antonis.gwt.example.client.service.RestClientGWT;
 import co.antonis.gwt.example.client.utilities.Log;
