@@ -63,7 +63,10 @@ public class FieldInfo {
     }
 
     public String structureSet(String value){
-        return "structure.set"+nameUpper()+"("+value+")";
+        if((fieldClass== Boolean.class || fieldClass==boolean.class) && nameField.indexOf("is")==0)
+            return "structure.set" + Utilities.toUpperFirstLtr(nameField.substring(2)) + "(" + value + ")";
+        else
+            return "structure.set" + nameUpper() + "(" + value + ")";
     }
 
     public String toSimpleString(){

@@ -38,6 +38,9 @@ public class SerializationGWTJson_Sub {
       if(jsonObject.get("nameOfType")!=null) {
         structure.setPojoType(PojoType.valueOf(jsonObject.get("nameOfType").isString().stringValue()));
       }
+      if(jsonObject.get("isBooleanValue")!=null) {
+        structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("isBooleanValue").toString()));
+      }
       if(jsonObject.get("date")!=null) {
         structure.setDate(SerializationGWTUtilities.toDateFromV(jsonObject.get("date")/*.isString().stringValue()*/));
       }
@@ -108,9 +111,6 @@ public class SerializationGWTJson_Sub {
             (s)->s!=null ? Integer.parseInt(s) : null,
             (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
             );
-      }
-      if(jsonObject.get("booleanValue")!=null) {
-        structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("booleanValue").toString()));
       }
       if(jsonObject.get("mapListChild")!=null) {
         structure.setMapListChild(SerializationGWTUtilities.toMapJson_FuncS(

@@ -1,7 +1,6 @@
 package co.antonis.gwt.example.client.generated;
 
 
-import co.antonis.gwt.example.client.model.others.InfoMessageStructure;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.*;
 

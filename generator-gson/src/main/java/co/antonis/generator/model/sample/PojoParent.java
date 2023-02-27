@@ -28,7 +28,7 @@ public class PojoParent {
     double numberDouble;
 
     @Expose
-    boolean booleanValue;
+    boolean isBooleanValue;
 
     @Expose
     @SerializedName("id")
@@ -100,11 +100,11 @@ public class PojoParent {
     }
 
     public boolean isBooleanValue() {
-        return booleanValue;
+        return isBooleanValue;
     }
 
     public void setBooleanValue(boolean booleanValue) {
-        this.booleanValue = booleanValue;
+        isBooleanValue = booleanValue;
     }
 
     public PojoType getPojoType() {
@@ -280,7 +280,7 @@ public class PojoParent {
                prefix + ", stringNotSet='" + stringNotSet + "\' is null:" + (stringNotSet == null) +
                prefix + ", numberInt=" + numberInt +
                prefix + ", numberDouble=" + numberDouble +
-               prefix + ", booleanValue=" + booleanValue +
+               prefix + ", booleanValue=" + isBooleanValue +
                prefix + ", numberLong=" + numberLong +
                prefix + ", numberLongClass=" + numberLongClass +
                prefix + ", listString=" + listString +

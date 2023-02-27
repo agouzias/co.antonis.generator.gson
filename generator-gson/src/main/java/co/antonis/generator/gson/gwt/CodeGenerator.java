@@ -296,13 +296,13 @@ public class CodeGenerator {
 
         // Always print debug is supported
         if (isPrintLogInfo) {
-            method.addStatement(code_toLog("Field:" + fI.nameField + ":\"+" + fI.jsonObjGet()));
+            method.addStatement(code_toLog("Field:" + fI.nameField + ":\"+" + fI.jsonObjGet(), true));
         }
 
         // Return if it is not supported
         if (!isSupported) {
 
-            method.addComment("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored.");
+            method.addComment(CodeGeneratorUtilities.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
 
         } else {
 
@@ -516,8 +516,8 @@ public class CodeGenerator {
         return prefix_In_Container + "$T.toMap"+(isParamJsonValue?"Json":"String")+"_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
     }
 
-    static String code_toLog(String msg) {
-        return "log.info(\"" + msg + "\")";
+    static String code_toLog(String msg, boolean isOmitLastQuotes) {
+        return "log.info(\"" + msg + (isOmitLastQuotes ? ")" : "\")");
     }
 
     static String code_toEnum(String param) {
@@ -586,7 +586,6 @@ public class CodeGenerator {
                                 generateCode_FromJson_Method(method_convertFromJson, classInfo);
 
                                 classGroupI.listMethodsFromJson.add(method_convertFromJson.build());
-                                //listMethodsFromJson.add(method_convertFromJson.build());
                             }
 
                             if (isGenerateToJsonMethods) {
@@ -599,8 +598,7 @@ public class CodeGenerator {
                                 method_convertToJson
                                         .addCode(generatedCode_ToJson_Method(method_convertToJson, classInfo));
 
-                                classGroupI.listMethodsFromJson.add(method_convertToJson.build());
-                                //listMethodsToJson.add(method_convertToJson.build());
+                                classGroupI.listMethodsToJson.add(method_convertToJson.build());
                             }
                         }
                     });
