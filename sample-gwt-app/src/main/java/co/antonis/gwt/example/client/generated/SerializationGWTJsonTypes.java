@@ -13,6 +13,7 @@ public class SerializationGWTJsonTypes {
   PojoSimple.class,
   };
 
+
   public static <T> T fromJson(Class<T> clazz, String json) {
     if(clazz==PojoParent.class) {
       return (T)SerializationGWTJson_Sample.toPojoParent(json);
