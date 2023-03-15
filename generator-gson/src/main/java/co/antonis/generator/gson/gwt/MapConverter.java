@@ -9,6 +9,9 @@ import java.util.Map;
 import static co.antonis.generator.gson.gwt.CodeGenerator.classUtilities;
 
 public class MapConverter {
+
+    public static MethodConvert<Object> MethodConvert_ofPojo = MethodConvert.i(Object.class, "$$$.isObject().toString()", "(s)-> s!=null ? $$$ : ''");
+
     public static Map<Class<?>, MethodConvert<?>> MapConverters = new HashMap<>();
 
     /*

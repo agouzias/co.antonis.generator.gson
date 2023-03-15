@@ -142,11 +142,11 @@ public class PojoParent {
         this.string = string;
     }
 
-    public long getNumberLong() {
+    public Long getNumberLong() {
         return numberLong;
     }
 
-    public void setNumberLong(long numberLong) {
+    public void setNumberLong(Long numberLong) {
         this.numberLong = numberLong;
     }
 
@@ -172,10 +172,6 @@ public class PojoParent {
 
     public void setMapString(Map<Integer, String> mapString) {
         this.mapString = mapString;
-    }
-
-    public void setNumberLong(Long numberLong) {
-        this.numberLong = numberLong;
     }
 
     public List getListAny() {

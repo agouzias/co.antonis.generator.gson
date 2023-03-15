@@ -107,13 +107,13 @@ public class SerializationGWTUtilities {
     //endregion
 
     //region List
-    public static <T> List<T> toListString_FuncS(String jsonS, Function<String, T> convert) {
+    public static <T> List<T> toListPojo_String_FuncS(String jsonS, Function<String, T> convert) {
         if (jsonS == null)
             return null;
-        return toListJson_FuncS(JSONParser.parseStrict(jsonS), convert);
+        return toListPojo_Json_FuncS(JSONParser.parseStrict(jsonS), convert);
     }
 
-    public static <T> List<T> toListJson_FuncS(JSONValue jsonV, Function<String, T> convert) {
+    public static <T> List<T> toListPojo_Json_FuncS(JSONValue jsonV, Function<String, T> convert) {
         if (jsonV != null) {
             List<T> listStructure = new ArrayList<>();
             JSONArray jsonArray = jsonV.isArray();
@@ -126,7 +126,7 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <T> List<T> toListJson_FuncJ(JSONValue jsonV, Function<JSONValue, T> convert) {
+    public static <T> List<T> toListPojo_Json_FuncJ(JSONValue jsonV, Function<JSONValue, T> convert) {
         if (jsonV != null) {
             List<T> listStructure = new ArrayList<>();
             JSONArray jsonArray = jsonV.isArray();
@@ -137,16 +137,24 @@ public class SerializationGWTUtilities {
         }
         return null;
     }
+
+    public static <T> JSONArray toListJson_ (List<T> list,Function<T , JSONValue> convert){
+        JSONArray jsonArray = new JSONArray();
+        for(int index = 0;index<list.size();index++){
+            jsonArray.set(index, convert.apply(list.get(index)));
+        }
+        return jsonArray;
+    }
     //endregion
 
     //region Methods Map
-    public static <K, V> Map<K, V> toMapString_FuncS(String jsonS, Function<String, K> convertKey, Function<String, V> convertValue) {
+    public static <K, V> Map<K, V> toMapPojo_String_FuncS(String jsonS, Function<String, K> convertKey, Function<String, V> convertValue) {
         if (jsonS == null)
             return null;
-        return toMapJson_FuncS(JSONParser.parseStrict(jsonS), convertKey, convertValue);
+        return toMapPojo_Json_FuncS(JSONParser.parseStrict(jsonS), convertKey, convertValue);
     }
 
-    public static <K, V> Map<K, V> toMapJson_FuncS(JSONValue jsonV, Function<String, K> convertKey, Function<String, V> convertValue) {
+    public static <K, V> Map<K, V> toMapPojo_Json_FuncS(JSONValue jsonV, Function<String, K> convertKey, Function<String, V> convertValue) {
         if (jsonV != null) {
             Map<K, V> mapStructure = new HashMap<>();
             JSONObject jsonObject = jsonV.isObject();
@@ -160,7 +168,7 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <K, V> Map<K, V> toMapJson_FuncJ(JSONValue jsonV, Function<String, K> convertKey, Function<JSONValue, V> convertValue) {
+    public static <K, V> Map<K, V> toMapPojo_Json_FuncJ(JSONValue jsonV, Function<String, K> convertKey, Function<JSONValue, V> convertValue) {
         if (jsonV != null) {
             Map<K, V> mapStructure = new HashMap<>();
             JSONObject jsonObject = jsonV.isObject();
