@@ -640,7 +640,7 @@ public class CodeGenerator {
                                         .methodBuilder(classInfo.getMethodToJson())
                                         .addParameter(classInfo.getClassToSerialize(), "structure")
                                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                        .returns(JsonObject.class);
+                                        .returns(classJsonObject);
 
                                 generatedCode_ToJson_Method(method_convertToJson, classInfo);
 
