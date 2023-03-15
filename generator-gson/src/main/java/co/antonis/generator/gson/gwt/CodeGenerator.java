@@ -6,7 +6,9 @@ import co.antonis.generator.gson.ReaderJava;
 import co.antonis.generator.gson.model.ClassInfo;
 import co.antonis.generator.gson.model.FieldInfo;
 import co.antonis.generator.gson.model.PairStructure;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import com.google.j2objc.annotations.ReflectionSupport;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
  * }
  * return result;
  */
+@SuppressWarnings({"UnusedReturnValue", "SameParameterValue", "unused"})
 public class CodeGenerator {
 
     //region Members of code generation/POET
@@ -44,14 +47,20 @@ public class CodeGenerator {
     static ClassName classJsonParser = ClassName.get("com.google.gwt.json.client", "JSONParser");
     static ClassName classDateFormat = ClassName.get("com.google.gwt.i18n.client", "DateTimeFormat");
     static ClassName classUtilities = ClassName.get("", "SerializationGWTUtilities");
+    static ClassName classJsonString = ClassName.get("com.google.gwt.json.client", "JSONString");
+    static ClassName classJsonNumber = ClassName.get("com.google.gwt.json.client", "JSONNumber");
+    static ClassName classJsonBoolean = ClassName.get("com.google.gwt.json.client", "JSONBoolean");
+
+    static String prefix_In_Container = "" /*"\n"*/;
+    static String NOT_IMPLEMENTED = "Not implemented. Consider to add it manually or ignore field";
     //endregion
 
     //region Members Configuration
     /**
-     * The classic senario is to construct a single class in
+     * The classic scenario is to construct a single class in
      * generatedPackageName.generatedClassNameSingle with all the methods.
      * <p>
-     * Alternative you can construct many classes in
+     * Alternative you can construct a classes per package
      * generatedPackageName.generateClassName with replace "$"
      */
     public String generatedPackageName = "co.antonis.gwt.generated";
@@ -64,7 +73,6 @@ public class CodeGenerator {
 
     public boolean isCheckNotNullTheJsonValue_BeforeSetJavaField = true;
     public boolean isPrintLogInfo = false;
-    public boolean isUseUtilsForPrimitive = false;
     //endregion
 
     //region Members generated
@@ -74,45 +82,12 @@ public class CodeGenerator {
     //endregion
 
     //region Static Converters
-    public static Map<Class<?>, MethodConvert<?>> MapConverters = new HashMap<>();
 
-    /*
-     * Converter of Primitive Types (String to Java Object)
-     * inline OR method based (needed in list/map)
-     */
-    static {
-        /*
-         * Supported Primitive Types and convert function (inline and methods - for loops and maps)
-         * Note that 'inline' (str->value) don't do 'null' since we check that jsonObject['field'] is not null before usage.
-         * @see isCheckNotNullTheJsonValue_BeforeSetJavaField
-         *
-         * BUT the function (str) {value} it is used in containers and items should be added even if there are null
-         */
-        MapConverters.put(String.class, MethodConvert.i(String.class, "$$$.isString().stringValue()", "(s)->s")); /*not use s.toString() in function to avoid null pointer*/
-        MapConverters.put(Date.class, MethodConvert.i(Date.class, classUtilities.simpleName() + ".toDateFromV($$$/*.isString().stringValue()*/)", "(s)->" + classUtilities.simpleName() + ".toDateFromS(s)").setInUtilitiesClass(true));
-
-        MapConverters.put(Integer.class, MethodConvert.i(Integer.class, "Integer.parseInt($$$.toString())", "(s)->s!=null ? Integer.parseInt(s) : null"));
-        MapConverters.put(int.class, MethodConvert.i(int.class, "Integer.parseInt($$$.toString())", "(s)->s!=null ? Integer.parseInt(s) : 0"));
-        MapConverters.put(Long.class, MethodConvert.i(Long.class, "Long.parseLong($$$.toString())", "(s)-> s!=null ?Long.parseLong(s) : null"));
-        MapConverters.put(long.class, MethodConvert.i(long.class, "Long.parseLong($$$.toString())", "(s)-> s!=null ?Long.parseLong(s) : 0"));
-        MapConverters.put(Double.class, MethodConvert.i(Double.class, "Double.parseDouble($$$.toString())", "(s)-> s!=null ? Double.parseDouble(s) : null"));
-        MapConverters.put(double.class, MethodConvert.i(double.class, "Double.parseDouble($$$.toString())", "(s)->s!=null ? Double.parseDouble(s): null"));
-        MapConverters.put(Float.class, MethodConvert.i(Float.class, "Float.parseFloat($$$.toString())", "(s)-> s!=null ?Float.parseFloat(s): null"));
-        MapConverters.put(float.class, MethodConvert.i(float.class, "Float.parseFloat($$$.toString())", "(s)-> s!=null ?Float.parseFloat(s): 0f"));
-
-        MapConverters.put(Boolean.class, MethodConvert.i(Boolean.class, "Boolean.parseBoolean($$$.toString())", "(s)-> s!=null ? Boolean.parseBoolean(s): null"));
-        MapConverters.put(boolean.class, MethodConvert.i(boolean.class, "Boolean.parseBoolean($$$.toString())", "(s)->s!=null ? Boolean.parseBoolean(s) : false"));
-        MapConverters.put(Character.class, MethodConvert.i(Character.class, "$$$.isString().stringValue().charAt(0)", "(s)->s!=null ? Character.valueOf(s): null"));
-        MapConverters.put(char.class, MethodConvert.i(char.class, "$$$.isString().stringValue().charAt(0)", "(s)-> s!=null ? Character.valueOf(s) : ''"));
-
-        //Special Case / Special Handling
-    }
 
     public static MethodConvert<Object> MethodConvert_ofPojo = MethodConvert.i(Object.class, "$$$.isObject().toString()", "(s)-> s!=null ? $$$ : ''");
 
     public static List<Class<?>> listSupportedContainers = Arrays.asList(List.class, Map.class);
     //endregion
-
 
     //region Methods Setters
     public CodeGenerator() {
@@ -199,7 +174,7 @@ public class CodeGenerator {
     }
     //endregion
 
-    //region Filters & Lists
+    //region Finders, Filters & Lists
     static List<Field> listFields_OfClass(Class<?> clazz, boolean isOnlyWithExposeAnnotation) {
         // Get fields
         List<Field> fields = new ArrayList<>(ReaderJava.findFields(clazz, isOnlyWithExposeAnnotation ? Expose.class : null));
@@ -222,6 +197,27 @@ public class CodeGenerator {
         }
         return fieldsFiltered;
     }
+
+    static ClassInfo findClassInfoWithType(Class<?> clazz, List<ClassInfo> listClassInfo) {
+        List<ClassInfo> cI_list = listClassInfo.stream().filter((cI) -> cI.getClassToSerialize() == clazz).collect(Collectors.toList());
+
+        if (cI_list.size() > 0) {
+            //TODO should i warn? if greater than one
+            return cI_list.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Finder of Converter.
+     *
+     * @param clazz, input class
+     * @return methodConverter of class
+     */
+    public MethodConvert<?> converterOf(Class<?> clazz) {
+        return MapConverter.MapConverters.get(clazz);
+    }
+
     //endregion
 
     //region Methods To Json
@@ -234,11 +230,86 @@ public class CodeGenerator {
      * @param cI,     the input ClassInfo to create the method
      * @return the generated code-block of the method
      */
-    public static CodeBlock generatedCode_ToJson_Method(MethodSpec.Builder method, ClassInfo cI) {
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
+    public MethodSpec.Builder generatedCode_ToJson_Method(MethodSpec.Builder method, ClassInfo cI) {
+        Utilities.log.info("Class To JSON [" + cI.getClassToSerialize() + "]");
 
-        codeBlock.addStatement("return \"TODO\"");
-        return codeBlock.build();
+        List<FieldInfo> listFields = cI.getListFieldInfo();
+        method.beginControlFlow("if (structure == null) ")
+                .addStatement("return null")
+                .endControlFlow();
+
+        method.addStatement("$T jsonObject = new $T()", classJsonObject, classJsonObject);
+        listFields.forEach(fieldI -> {
+            generateCode_ToJson_SetField(method, fieldI);
+        });
+        method.addStatement("return jsonObject");
+        return method;
+    }
+
+    @SuppressWarnings("Duplicates")
+    public void generateCode_ToJson_SetField(MethodSpec.Builder method, FieldInfo fI) {
+        Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
+
+        Class<?> classOfField = fI.fieldClass;
+        ClassInfo cInfo_OfField = findClassInfoWithType(classOfField, listClassInfo);
+        boolean isSupported = MapConverter.MapConverters.containsKey(classOfField) || cInfo_OfField != null || classOfField.isEnum() || listSupportedContainers.contains(classOfField);
+
+        // Always print debug is supported
+        if (isPrintLogInfo) {
+            method.addStatement(code_toLog(quote("Field:" + fI.nameField + ":") + "+" + fI.structureGet(), true));
+        }
+
+        if (!isSupported) {
+
+            method.addComment(CodeGeneratorUtilities.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
+
+        } else {
+
+            //
+            if (isCheckNotNullTheJsonValue_BeforeSetJavaField && !fI.isPrimitive())
+                method.beginControlFlow("if(" + fI.structureGet() + "!=null)");
+
+            if (MapConverter.MapConverters.containsKey(classOfField)) {
+                /*
+                 * A. Case Primitive Type
+                 */
+                String convertCode = converterOf(classOfField).inline_Class_ToJsonV(fI.structureGet());
+                if (convertCode == null)
+                    method.addComment(NOT_IMPLEMENTED);
+                else
+                    method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
+            } else if (cInfo_OfField != null) {
+
+                /*
+                 * B. Pojo, the field is another pojo, use a 'fromJson(String)' to convert it.
+                 * code = toXXXFromJson(parameterName)
+                 */
+
+                String convertCode = cInfo_OfField.code_methodToJson(MethodConvert_ofPojo.inline_JsonV_ToClass(fI.structureGet()));
+                method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
+
+            } else if (fI.fieldClass.isEnum()) {
+
+                /*
+                 * C. Case Enum
+                 * code = Enum.valueOf( parameterName.isString().stringValue() )
+                 */
+
+                String convertCode = converterOf(String.class).inline_Class_ToJsonV(fI.structureGet() + ".name()");
+                method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
+
+            } else if (fI.isSupportedContainer(listSupportedContainers)) {
+
+            }
+
+            if (isCheckNotNullTheJsonValue_BeforeSetJavaField && !fI.isPrimitive())
+                method.endControlFlow();
+
+        }
+    }
+
+    static String quote(String val) {
+        return "\"" + val + "\"";
     }
     //endregion
 
@@ -253,7 +324,7 @@ public class CodeGenerator {
      * @return the generated code-block of the method
      */
     public MethodSpec.Builder generateCode_FromJson_Method(MethodSpec.Builder method, ClassInfo cI) {
-        Utilities.log.info("Class [" + cI.getClassToSerialize() + "]");
+        Utilities.log.info("Class From JSON [" + cI.getClassToSerialize() + "]");
 
         List<FieldInfo> listFields = cI.getListFieldInfo();
 
@@ -262,12 +333,9 @@ public class CodeGenerator {
                 .beginControlFlow("\r\nif (jsonObject != null) ")
                 .addStatement("$T structure = new $T()", cI.getClassToSerialize(), cI.getClassToSerialize());
 
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-
         //For ALL exposed fields
-        listFields.forEach((field -> {
-            //codeBlock.add(generateCode_FromJson_SetField(method, field));
-            generateCode_FromJson_SetField(method, field);
+        listFields.forEach((fieldI -> {
+            generateCode_FromJson_SetField(method, fieldI);
         }));
 
         method
@@ -275,7 +343,7 @@ public class CodeGenerator {
                 .endControlFlow()
                 .addStatement("return null");
 
-        return /*codeBlock.build()*/method;
+        return method;
     }
 
 
@@ -285,18 +353,18 @@ public class CodeGenerator {
      * and generate the correct setXXX(....)
      *
      * @param fI, the fieldInfo to set
-     * @return the generated code block
      */
+    @SuppressWarnings("Duplicates")
     public void generateCode_FromJson_SetField(MethodSpec.Builder method, FieldInfo fI) {
         Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
 
         Class<?> classOfField = fI.fieldClass;
         ClassInfo cInfo_OfField = findClassInfoWithType(classOfField, listClassInfo);
-        boolean isSupported = MapConverters.containsKey(classOfField) || cInfo_OfField != null || classOfField.isEnum() || listSupportedContainers.contains(classOfField);
+        boolean isSupported = MapConverter.MapConverters.containsKey(classOfField) || cInfo_OfField != null || classOfField.isEnum() || listSupportedContainers.contains(classOfField);
 
         // Always print debug is supported
         if (isPrintLogInfo) {
-            method.addStatement(code_toLog("Field:" + fI.nameField + ":\"+" + fI.jsonObjGet(), true));
+            method.addStatement(code_toLog(quote("Field:" + fI.nameField + ":") + "+" + fI.jsonObjGet(), true));
         }
 
         // Return if it is not supported
@@ -310,7 +378,7 @@ public class CodeGenerator {
             if (isCheckNotNullTheJsonValue_BeforeSetJavaField)
                 method.beginControlFlow("if(" + fI.jsonObjGet() + "!=null)");
 
-            if (MapConverters.containsKey(classOfField)) {
+            if (MapConverter.MapConverters.containsKey(classOfField)) {
 
                 /*
                  * A. Case Primitive Type
@@ -320,7 +388,7 @@ public class CodeGenerator {
                 //Using Inline function of JSON to Primitive
                 String convertCode = converterOf(fI.fieldClass).inline_JsonV_ToClass(fI.jsonObjGet());
                 if (convertCode == null) {
-                    method.addComment("Not implemented. Consider to add it manually or ignore field");
+                    method.addComment(NOT_IMPLEMENTED);
                 } else {
                     method.addStatement(fI.structureSet(convertCode), classUtilities);
                 }
@@ -356,7 +424,7 @@ public class CodeGenerator {
                 PairStructure<String, Boolean> codePair = generatedCode_FromJson_SetField_Container(
                         fI.field.getGenericType(),
                         fI.jsonObjGet(),
-                        "[Member:" + fI.nameField + "/ Serializable:" + fI.nameSerializable + "] ("+fI.field.getGenericType()+")",
+                        "[Member:" + fI.nameField + "/ Serializable:" + fI.nameSerializable + "] (" + fI.field.getGenericType() + ")",
                         true,
                         0
                 );
@@ -413,11 +481,11 @@ public class CodeGenerator {
                 return code(code_toMap_fromV_methodS(isParamJsonValue, paramName, methodConvert_key, methodConvert_value));
 
             } else {
-                return comment("TODO "+fieldName_ForComments + " Not implemented container");
+                return comment("TODO " + fieldName_ForComments + " Not implemented container");
             }
 
         } else {
-            return comment("TODO "+fieldName_ForComments + " Not type parameters in container (ignoring)");
+            return comment("TODO " + fieldName_ForComments + " Not type parameters in container (ignoring)");
         }
 
     }
@@ -426,8 +494,8 @@ public class CodeGenerator {
      * Generate implementation of Function<K,String> class
      * This is the generator of
      *
-     * @param fieldType
-     * @return
+     * @param fieldType, type of converter
+     * @return code/string of the needed converter
      */
     public String generateCode_FunctionFromStringToClass(Type fieldType, int iterationIndex) {
         if (fieldType instanceof Class) {
@@ -436,7 +504,7 @@ public class CodeGenerator {
              * A. Primitive / Pojo / Enum
              */
             Class<?> fileTypeClass = (Class<?>) fieldType;
-            if (MapConverters.containsKey(fileTypeClass)) {
+            if (MapConverter.MapConverters.containsKey(fileTypeClass)) {
 
                 /*
                  * 1. "Primitive", find the Function<String,K> lamda function to use
@@ -464,7 +532,6 @@ public class CodeGenerator {
 
             }
         } else if (fieldType instanceof ParameterizedType) {
-
             /*
              *  3. The type is "Parameterized" meaning that we have probably a container
              *  and need set based on
@@ -477,47 +544,27 @@ public class CodeGenerator {
         return null;
     }
 
-    static ClassInfo findClassInfoWithType(Class<?> clazz, List<ClassInfo> listClassInfo) {
-        List<ClassInfo> cI_list = listClassInfo.stream().filter((cI) -> cI.getClassToSerialize() == clazz).collect(Collectors.toList());
-
-        if (cI_list.size() > 0) {
-            //TODO should i warn? if greater than one
-            return cI_list.get(0);
-        }
-        return null;
-    }
-
-    /**
-     * Finder of Converter.
-     *
-     * @param clazz, input class
-     * @return methodConverter of class
-     */
-    public MethodConvert converterOf(Class<?> clazz) {
-        return MapConverters.get(clazz);
-    }
-
-    static String prefix_In_Container = "" /*"\n"*/;
 
     static String code_toList_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_from_s) {
-        return prefix_In_Container + "$T.toList"+(isParamJsonValue?"Json":"String")+"_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
+        return prefix_In_Container + "$T.toList" + (isParamJsonValue ? "Json" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
     }
 
     /**
-     *  Utils.toMap_FromS(param, function(), function())
+     * Utils.toMap_FromString OR toMap_FromString (param, function(), function())
+     * Generate java-code that converts a parameter (string OR jsonV) to Map<K,V>
+     * The Key, Value converters are always converting from String.
      *
-     * @param isParamJsonValue
-     * @param param
-     * @param convertMethod_key_from_s
-     * @param convertMethod_value_from_s
-     * @return
+     * @param isParamJsonValue,           if the parameter is String or JsonV
+     * @param param,                      the parameter name
+     * @param convertMethod_key_from_s,   the convert Key
+     * @param convertMethod_value_from_s, the convert Value
      */
     static String code_toMap_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_key_from_s, String convertMethod_value_from_s) {
-        return prefix_In_Container + "$T.toMap"+(isParamJsonValue?"Json":"String")+"_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
+        return prefix_In_Container + "$T.toMap" + (isParamJsonValue ? "Json" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
     }
 
-    static String code_toLog(String msg, boolean isOmitLastQuotes) {
-        return "log.info(\"" + msg + (isOmitLastQuotes ? ")" : "\")");
+    static String code_toLog(String msg, boolean isOmitQuotes) {
+        return "log.info(" + (isOmitQuotes ? "" : "\"") + msg + (isOmitQuotes ? ")" : "\")");
     }
 
     static String code_toEnum(String param) {
@@ -593,10 +640,9 @@ public class CodeGenerator {
                                         .methodBuilder(classInfo.getMethodToJson())
                                         .addParameter(classInfo.getClassToSerialize(), "structure")
                                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                        .returns(String.class);
+                                        .returns(JsonObject.class);
 
-                                method_convertToJson
-                                        .addCode(generatedCode_ToJson_Method(method_convertToJson, classInfo));
+                                generatedCode_ToJson_Method(method_convertToJson, classInfo);
 
                                 classGroupI.listMethodsToJson.add(method_convertToJson.build());
                             }
@@ -608,10 +654,13 @@ public class CodeGenerator {
         mapClassGroupInfo.values().forEach((classGroupI) -> {
             TypeSpec.Builder classBuilder = TypeSpec.classBuilder(classGroupI.className).addModifiers(Modifier.PUBLIC);
 
+
+            /*import ..*/
+
             //Java Doc for each class
             classBuilder.addJavadoc("Generated for total " + classGroupI.listClassInfo.size() + " structures \r\n\r\n");
             for (ClassInfo cI : classGroupI.listClassInfo) {
-                classBuilder.addJavadoc(CodeGeneratorUtilities.toComment_safe("" + cI.getClassToSerialize().getName() + " [fields:" + cI.getListFieldInfo().size() + "/" + cI.getClassToSerialize().getDeclaredFields().length + "] \r\n"));
+                classBuilder.addJavadoc(CodeGeneratorUtilities.toComment_safe("@see " + cI.getClassToSerialize().getName() + " [fields:" + cI.getListFieldInfo().size() + "/" + cI.getClassToSerialize().getDeclaredFields().length + "] \r\n"));
             }
 
             //Logger and helper methods (if any)
@@ -637,7 +686,11 @@ public class CodeGenerator {
         List<JavaFile> listJavaFile = new ArrayList<>();
 
         List<TypeSpec> listSpecs = generate_JavaCode(setClasses);
-        listSpecs.add(CodeGeneratorUtilities.generate_javaCodeTypes(this, this.generatedClassName + "Types"));
+        listSpecs.add(
+                CodeGeneratorUtilities.generate_javaCodeTypes(
+                        this,
+                        this.generatedClassName + "Types",
+                        isGenerateFromJsonMethods, isGenerateToJsonMethods));
 
         /*
          * E. Export

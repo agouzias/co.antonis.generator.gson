@@ -22,9 +22,9 @@ public class StartCodeGenerator {
 
         new CodeGenerator()
                 .setExportOnlyExpose(true)
-                .setPrintLogInfo(false)
-                .setGenerateToJsonMethods(false)
-                .setGenerateFromJsonMethods(true)
+                .setPrintLogInfo(true)
+                .setGenerateToJsonMethods(true)
+                .setGenerateFromJsonMethods(false)
                 .setGeneratedClassName("SerializationGWTJson", true)
                 .setGeneratedPackageName("co.antonis.gwt.example.client.generated")
                 .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\apps\\co.antonis.generator\\generator-gson-gwt\\sample-gwt-app\\src\\main\\java"))

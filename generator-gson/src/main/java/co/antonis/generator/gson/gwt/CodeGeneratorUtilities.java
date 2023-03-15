@@ -41,11 +41,14 @@ public class CodeGeneratorUtilities {
      * Generate A helper  class, with from/to methods in a single method based on the input class
      *
      * @param codeGenerator
-     * @param name
+     * @param className
      * @return
      */
-    public static TypeSpec generate_javaCodeTypes(CodeGenerator codeGenerator, String name) {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(name).addModifiers(Modifier.PUBLIC);
+    public static TypeSpec generate_javaCodeTypes(CodeGenerator codeGenerator,
+                                                  String className,
+                                                  boolean isGenerateFromJson,
+                                                  boolean isGenerateToJson) {
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className).addModifiers(Modifier.PUBLIC);
 
         //1. Add All serialized classes
         TypeName classType = ArrayTypeName.of(Class.class);
@@ -59,7 +62,9 @@ public class CodeGeneratorUtilities {
         classBuilder.addField(fieldSpec.build());
 
         //2. Add method "fromJson"
-        classBuilder.addMethod(CodeGeneratorUtilities.code_FromJson_For_All_POJO_Method(codeGenerator));
+        if (isGenerateFromJson)
+            classBuilder.addMethod(CodeGeneratorUtilities.code_FromJson_For_All_POJO_Method(codeGenerator));
+
 
 
         return classBuilder.build();

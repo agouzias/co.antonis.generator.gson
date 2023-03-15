@@ -34,6 +34,10 @@ public class FieldInfo {
         nameSerializable = anSerializableName != null ? anSerializableName.value() : field.getName();
     }
 
+    public boolean isPrimitive(){
+        return fieldClass.isPrimitive();
+    }
+
     public String nameUpper() {
         return Utilities.toUpperFirstLtr(nameField);
     }
@@ -46,31 +50,48 @@ public class FieldInfo {
         return list.contains(fieldClass);
     }
 
-    public ClassInfo isPojo(List<ClassInfo> list){
-        for(ClassInfo cI:list){
-            if(fieldClass==cI.classToSerialize)
+    public ClassInfo isPojo(List<ClassInfo> list) {
+        for (ClassInfo cI : list) {
+            if (fieldClass == cI.classToSerialize)
                 return cI;
         }
         return null;
     }
 
     public String jsonObjGet() {
-        return jsonObjGet("jsonObject",false);
+        return jsonObjGet("jsonObject", false);
     }
 
     public String jsonObjGet(String paramName, boolean isIncludeToString) {
-        return paramName+".get(\"" + nameSerializable + "\")" + (isIncludeToString ? ".toString()" : "");
+        return paramName + ".get(\"" + nameSerializable + "\")" + (isIncludeToString ? ".toString()" : "");
     }
 
-    public String structureSet(String value){
-        if((fieldClass== Boolean.class || fieldClass==boolean.class) && nameField.indexOf("is")==0)
+    public static String jsonObjPut(String key, String value){
+        return "jsonObject.put(\""+key+"\","+value+")";
+    }
+
+    public String structureSet(String value) {
+        if ((fieldClass == Boolean.class || fieldClass == boolean.class) && nameField.indexOf("is") == 0)
             return "structure.set" + Utilities.toUpperFirstLtr(nameField.substring(2)) + "(" + value + ")";
         else
             return "structure.set" + nameUpper() + "(" + value + ")";
     }
 
-    public String toSimpleString(){
-        return "["+nameField+"]["+fieldClass+"]";
+
+
+    public String structureGet() {
+        // 'isBoolValue = "isBooleanValue()" , boolValue = 'isBoolValue()'
+        if (fieldClass == Boolean.class || fieldClass == boolean.class)
+            if (nameField.indexOf("is") == 0)
+                return "structure.is" + Utilities.toUpperFirstLtr(nameField.substring(2)) + "()";
+            else
+                return "structure.is" + nameUpper() + "()";
+        else
+            return "structure.get" + nameUpper() + "()";
+    }
+
+    public String toSimpleString() {
+        return "[" + nameField + "][" + fieldClass + "]";
     }
 
 }

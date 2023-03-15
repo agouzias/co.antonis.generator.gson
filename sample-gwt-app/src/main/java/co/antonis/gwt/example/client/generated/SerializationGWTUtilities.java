@@ -14,7 +14,21 @@ public class SerializationGWTUtilities {
     public static DateTimeFormat dateFormat_ISO8601 = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     public static DateTimeFormat dateFormat_Original = DateTimeFormat.getFormat("MMM, d, yyyy hh:mm:ss a");
 
-    //region Primitives
+
+    //region Testing from JSON
+    //endregion
+
+    //region Testing to JSON from Primitive
+    public static String testingToJson() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("num", new JSONNumber(3.4));
+        jsonObject.put("key", new JSONString("str"));
+        jsonObject.put("bool", JSONBoolean.getInstance(true));
+        return jsonObject.toString();
+    }
+    //endregion
+
+    //region from JSON to Primitives (currently not used, converting FROM string using inline approach)
     public static boolean toBoolean(JSONValue value) {
         if (value != null) {
             JSONBoolean bool = value.isBoolean();
@@ -50,7 +64,7 @@ public class SerializationGWTUtilities {
     }
     //endregion
 
-    //region Date Converter
+    //region from JSON to Date Converter
     public static Date toDateFromV(JSONValue jsonDate) {
         if (jsonDate == null)
             return null;
@@ -83,6 +97,12 @@ public class SerializationGWTUtilities {
         } catch (Exception ignored) {
         }
         return dateFormat_Original.parse(jsonDate);
+    }
+
+    public static JSONNumber toVFromDate(Date date) {
+        if (date == null)
+            return null;
+        return new JSONNumber(date.getTime());
     }
     //endregion
 

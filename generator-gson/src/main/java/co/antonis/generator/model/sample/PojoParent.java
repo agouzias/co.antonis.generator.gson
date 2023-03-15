@@ -31,6 +31,9 @@ public class PojoParent {
     boolean isBooleanValue;
 
     @Expose
+    boolean boolValue;
+
+    @Expose
     @SerializedName("id")
     Long numberLong;
 
@@ -105,6 +108,14 @@ public class PojoParent {
 
     public void setBooleanValue(boolean booleanValue) {
         isBooleanValue = booleanValue;
+    }
+
+    public boolean isBoolValue() {
+        return boolValue;
+    }
+
+    public void setBoolValue(boolean boolValue) {
+        this.boolValue = boolValue;
     }
 
     public PojoType getPojoType() {
