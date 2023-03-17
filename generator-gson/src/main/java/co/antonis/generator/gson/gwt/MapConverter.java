@@ -30,16 +30,18 @@ public class MapConverter {
                 MethodConvert.i(String.class,
                         "$$$.isString().stringValue()",
                         "new JSONString($$$)",
-                        "(s)->s",
-                        "(s)->s"
+                        "(pojo) -> new JSONString(pojo)",
+                        "(s) -> s",
+                        "(s) -> s"
                 )); /*not use s.toString() in function to avoid null pointer*/
 
         MapConverters.put(Date.class,
                 MethodConvert.i(Date.class,
                                 classUtilities.simpleName() + ".toDateFromV($$$/*.isString().stringValue()*/)",
                                 classUtilities.simpleName() + ".toVFromDate($$$)",
-                                "(s)->" + classUtilities.simpleName() + ".toDateFromS(s)",
-                                "TODO Date"
+                                "(pojo) -> " + classUtilities.simpleName() + ".toVFromDate(pojo)",
+                                "(s) -> " + classUtilities.simpleName() + ".toDateFromS(s)",
+                                "(dt) -> dt!=null ? Long.toString(dt.getTime()) : null"
                         )
                         .setInUtilitiesClass(true)
         );
@@ -48,40 +50,45 @@ public class MapConverter {
                 MethodConvert.i(Integer.class,
                         "Integer.parseInt($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)->s!=null ? Integer.parseInt(s) : null",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ? Integer.parseInt(s) : null",
+                        "(num) -> num!=null ? Integer.toString(num) : null"
                 ));
 
         MapConverters.put(int.class,
                 MethodConvert.i(int.class,
                         "Integer.parseInt($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)->s!=null ? Integer.parseInt(s) : 0",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ? Integer.parseInt(s) : 0",
+                        "(num) -> Integer.toString(num)"
                 ));
 
         MapConverters.put(Long.class,
                 MethodConvert.i(Long.class,
                         "Long.parseLong($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)-> s!=null ?Long.parseLong(s) : null",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ?Long.parseLong(s) : null",
+                        "(num) -> num!=null ? Long.toString(num) : null"
                 ));
 
         MapConverters.put(long.class,
                 MethodConvert.i(long.class,
                         "Long.parseLong($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)-> s!=null ?Long.parseLong(s) : 0",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ? Long.parseLong(s) : 0",
+                        "(num) -> Long.toString(num)"
                 ));
 
         MapConverters.put(Double.class,
                 MethodConvert.i(Double.class,
                         "Double.parseDouble($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)-> s!=null ? Double.parseDouble(s) : null",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ? Double.parseDouble(s) : null",
+                        "(num) -> num!=null ? Double.toString(num) : null"
 
                 ));
 
@@ -89,40 +96,45 @@ public class MapConverter {
                 MethodConvert.i(double.class,
                         "Double.parseDouble($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)->s!=null ? Double.parseDouble(s): null",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ? Double.parseDouble(s): null",
+                        "(num) -> Double.toString(num)"
                 ));
 
         MapConverters.put(Float.class,
                 MethodConvert.i(Float.class,
                         "Float.parseFloat($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)-> s!=null ?Float.parseFloat(s): null",
-                        "TODO Number"
+                        "(num) -> new JSONNumber(num)",
+                        "(s) -> s!=null ?Float.parseFloat(s): null",
+                        "(num) -> num!=null ? Float.toString(num) : null"
                 ));
 
         MapConverters.put(float.class,
                 MethodConvert.i(float.class,
                         "Float.parseFloat($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(s)-> s!=null ?Float.parseFloat(s): 0f",
-                        "TODO NUmber"
+                        "(pojo) -> new JSONNumber(pojo)",
+                        "(s) -> s!=null ?Float.parseFloat(s): 0f",
+                        "(num) -> Float.toString(num)"
                 ));
 
         MapConverters.put(Boolean.class,
                 MethodConvert.i(Boolean.class,
                         "Boolean.parseBoolean($$$.toString())",
                         "JSONBoolean.getInstance($$$)",
-                        "(s)-> s!=null ? Boolean.parseBoolean(s): null",
-                        "TODO Boolean"
+                        "(b) -> JSONBoolean.getInstance(b)",
+                        "(s) -> s!=null ? Boolean.parseBoolean(s): null",
+                        "(b) -> b!=null ? Boolean.toString(b) : null"
                 ));
 
         MapConverters.put(boolean.class,
                 MethodConvert.i(boolean.class,
                         "Boolean.parseBoolean($$$.toString())",
                         "JSONBoolean.getInstance($$$)",
-                        "(s)->s!=null ? Boolean.parseBoolean(s) : false",
-                        "TODO Boolean"
+                        "(pojo) -> JSONBoolean.getInstance(pojo)",
+                        "(s) -> s!=null ? Boolean.parseBoolean(s) : false",
+                        "(b) -> Boolean.toString(b)"
                 ));
 
         MapConverters.put(Character.class,

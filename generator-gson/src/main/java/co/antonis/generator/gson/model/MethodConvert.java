@@ -24,40 +24,52 @@ public class MethodConvert<C> {
     public String inline_JsonV_ToClass;
 
     /**
-     * A Lamda expression of
+     * Function<T,String>
      * Function<Integer,String> f =  (s) -> s.intValue();
+     *
      * you can use it as f.apply(s)
      * <p>
-     * Example "(s)-> s!=null ?Float.parseFloat(s): 0f"
+     * Example "(s)-> s!=null ? Float.parseFloat(s): 0f"
      */
     public String func_String_ToClass;
     public String func_Class_ToString;
 
-    //Not used
-    public String funcFromJsonVToClass;
+    /**
+     * Function<T, JSONValue>
+     * Function<Integer, JSONValue> f = (s) -> new JSONNumber(s)
+     *
+     */
+    public String func_Class_ToJsonV;
+    public String inline_Class_ToJsonV;
 
     /**
      *
      */
-    public String inline_Class_ToJsonV;
 
     public static <C> MethodConvert<C> i(Class<C> clazz, String inline_JsonV_ToClass, String func_String_ToClass) {
-        return i(clazz, inline_JsonV_ToClass, null, func_String_ToClass, null);
+        return i(clazz, inline_JsonV_ToClass, null, func_String_ToClass, null, null);
     }
 
-    public static <C> MethodConvert<C> i(Class<C> clazz, String inline_JsonV_ToClass, String inline_Class_toJsonV, String func_String_ToClass, String func_Class_ToString) {
-        return new MethodConvert<C>(clazz, inline_JsonV_ToClass, inline_Class_toJsonV, func_String_ToClass, func_Class_ToString, false);
+    public static <C> MethodConvert<C> i(Class<C> clazz,
+                                         String inline_JsonV_ToClass,
+                                         String inline_Class_toJsonV,
+                                         String func_Class_ToJsonV,
+                                         String func_String_ToClass,
+                                         String func_Class_ToString) {
+        return new MethodConvert<C>(clazz, inline_JsonV_ToClass, inline_Class_toJsonV, func_Class_ToJsonV, func_String_ToClass, func_Class_ToString,  false);
     }
 
     public MethodConvert(Class<C> clazz,
                          String inline_JsonV_ToClass,
                          String inline_Class_ToJsonV,
+                         String func_Class_ToJsonV,
                          String func_String_ToClass,
                          String func_Class_ToString,
                          boolean isInUtilitiesClass) {
         this.clazz = clazz;
         this.inline_JsonV_ToClass = inline_JsonV_ToClass;
         this.inline_Class_ToJsonV = inline_Class_ToJsonV;
+        this.func_Class_ToJsonV = func_Class_ToJsonV;
 
         this.func_String_ToClass = func_String_ToClass;
         this.func_Class_ToString = func_Class_ToString;

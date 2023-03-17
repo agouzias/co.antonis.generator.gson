@@ -2,11 +2,10 @@ package co.antonis.gwt.example.client.generated;
 
 import co.antonis.generator.model.sample.PojoParent;
 import co.antonis.generator.model.sample.PojoSimple;
-import co.antonis.generator.model.sample.PojoType;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
-import java.lang.String;
+import com.google.gwt.json.client.JSONString;
+
 import java.util.logging.Logger;
 
 /**
@@ -18,143 +17,74 @@ import java.util.logging.Logger;
 public class SerializationGWTJson_Sample {
   public static Logger log = Logger.getLogger("");
 
-  public static PojoSimple toPojoSimple(String json) {
-    JSONValue jsonValue = JSONParser.parseStrict(json);
-    JSONObject jsonObject = jsonValue.isObject();
-    
-    if (jsonObject == null)  {
+  public static JSONObject fromPojoSimple(PojoSimple structure) {
+    if (structure == null)  {
       return null;
     }
-    PojoSimple structure = new PojoSimple();
-    if(jsonObject.get("dateSimple")!=null) {
-      structure.setDateSimple(SerializationGWTUtilities.toDateFromV(jsonObject.get("dateSimple")/*.isString().stringValue()*/));
+    JSONObject jsonObject = new JSONObject();
+    if(structure.getDateSimple()!=null) {
+      jsonObject.put("dateSimple",SerializationGWTUtilities.toVFromDate(structure.getDateSimple()));
     }
-    if(jsonObject.get("listDateSimple")!=null) {
-      structure.setListDateSimple(SerializationGWTUtilities.toListPojo_Json_FuncS(
-          jsonObject.get("listDateSimple"),
-          (s)->SerializationGWTUtilities.toDateFromS(s))
-          );
+    if(structure.getListDateSimple()!=null) {
     }
-    if(jsonObject.get("intSimple")!=null) {
-      structure.setIntSimple(Integer.parseInt(jsonObject.get("intSimple").toString()));
+    jsonObject.put("intSimple",new JSONNumber(structure.getIntSimple()));
+    if(structure.getStringSimple()!=null) {
+      jsonObject.put("stringSimple",new JSONString(structure.getStringSimple()));
     }
-    if(jsonObject.get("stringSimple")!=null) {
-      structure.setStringSimple(jsonObject.get("stringSimple").isString().stringValue());
-    }
-    return structure;
+    return jsonObject;
   }
 
-  public static PojoParent toPojoParent(String json) {
-    JSONValue jsonValue = JSONParser.parseStrict(json);
-    JSONObject jsonObject = jsonValue.isObject();
-    
-    if (jsonObject == null)  {
+  public static JSONObject fromPojoParent(PojoParent structure) {
+    if (structure == null)  {
       return null;
     }
-    PojoParent structure = new PojoParent();
-    if(jsonObject.get("string")!=null) {
-      structure.setString(jsonObject.get("string").isString().stringValue());
+    JSONObject jsonObject = new JSONObject();
+    if(structure.getString()!=null) {
+      jsonObject.put("string",new JSONString(structure.getString()));
     }
-    if(jsonObject.get("mapString")!=null) {
-      structure.setMapString(SerializationGWTUtilities.toMapPojo_Json_FuncS(
-          jsonObject.get("mapString"),
-          (s)->s!=null ? Integer.parseInt(s) : null,
-          (s)->s)
-          );
+    if(structure.getMapString()!=null) {
     }
-    if(jsonObject.get("stringNotSet")!=null) {
-      structure.setStringNotSet(jsonObject.get("stringNotSet").isString().stringValue());
+    if(structure.getStringNotSet()!=null) {
+      jsonObject.put("stringNotSet",new JSONString(structure.getStringNotSet()));
     }
-    if(jsonObject.get("nameOfType")!=null) {
-      structure.setPojoType(PojoType.valueOf(jsonObject.get("nameOfType").isString().stringValue()));
+    if(structure.getPojoType()!=null) {
+      jsonObject.put("nameOfType",new JSONString(structure.getPojoType().name()));
     }
-    if(jsonObject.get("isBooleanValue")!=null) {
-      structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("isBooleanValue").toString()));
+    jsonObject.put("isBooleanValue", JSONBoolean.getInstance(structure.isBooleanValue()));
+    if(structure.getDate()!=null) {
+      jsonObject.put("date",SerializationGWTUtilities.toVFromDate(structure.getDate()));
     }
-    if(jsonObject.get("date")!=null) {
-      structure.setDate(SerializationGWTUtilities.toDateFromV(jsonObject.get("date")/*.isString().stringValue()*/));
+    if(structure.getListString()!=null) {
+      jsonObject.put("asdasd",SerializationGWTUtilities.toListJson_FuncJ(structure.getListString(),(s)->new JSONString(s)))
     }
-    if(jsonObject.get("listString")!=null) {
-      structure.setListString(SerializationGWTUtilities.toListPojo_Json_FuncS(
-          jsonObject.get("listString"),
-          (s)->s)
-          );
+    if(structure.getListDouble()!=null) {
     }
-    if(jsonObject.get("listDouble")!=null) {
-      structure.setListDouble(SerializationGWTUtilities.toListPojo_Json_FuncS(
-          jsonObject.get("listDouble"),
-          (s)-> s!=null ? Double.parseDouble(s) : null)
-          );
+    if(structure.getListLong()!=null) {
     }
-    if(jsonObject.get("listLong")!=null) {
-      structure.setListLong(SerializationGWTUtilities.toListPojo_Json_FuncS(
-          jsonObject.get("listLong"),
-          (s)-> s!=null ?Long.parseLong(s) : null)
-          );
+    if(structure.getListMapChild()!=null) {
     }
-    if(jsonObject.get("listMapChild")!=null) {
-      structure.setListMapChild(SerializationGWTUtilities.toListPojo_Json_FuncS(
-          jsonObject.get("listMapChild"),
-          (s0)->SerializationGWTUtilities.toMapPojo_String_FuncS(
-          s0,
-          (s)->s!=null ? Integer.parseInt(s) : null,
-          (s1)->SerializationGWTUtilities.toListPojo_String_FuncS(
-          s1,
-          (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
-          )
-          )
-          );
+    if(structure.getListPojoType()!=null) {
     }
-    if(jsonObject.get("listPojoType")!=null) {
-      structure.setListPojoType(SerializationGWTUtilities.toListPojo_Json_FuncS(
-          jsonObject.get("listPojoType"),
-          (s) -> co.antonis.generator.model.sample.PojoType.valueOf(s))
-          );
+    if(structure.getSimple()!=null) {
+      jsonObject.put("child",SerializationGWTJson_Sample.fromPojoSimple(structure.getSimple()));
     }
-    if(jsonObject.get("child")!=null) {
-      structure.setSimple(SerializationGWTJson_Sample.toPojoSimple(jsonObject.get("child").isObject().toString()));
+    // Not implemented. Consider to add it manually or ignore field
+    if(structure.getNumberLongClass()!=null) {
+      jsonObject.put("idL",new JSONNumber(structure.getNumberLongClass()));
     }
-    if(jsonObject.get("charA")!=null) {
-      structure.setCharA(jsonObject.get("charA").isString().stringValue().charAt(0));
+    if(structure.getListAny()!=null) {
     }
-    if(jsonObject.get("idL")!=null) {
-      structure.setNumberLongClass(Long.parseLong(jsonObject.get("idL").toString()));
+    jsonObject.put("numberInt",new JSONNumber(structure.getNumberInt()));
+    jsonObject.put("numberDouble",new JSONNumber(structure.getNumberDouble()));
+    // Not implemented. Consider to add it manually or ignore field
+    if(structure.getMapChild()!=null) {
     }
-    if(jsonObject.get("listAny")!=null) {
-      // TODO [Member:listAny/ Serializable:listAny] (interface java.util.List) Not type parameters in container (ignoring)
+    jsonObject.put("boolValue",JSONBoolean.getInstance(structure.isBoolValue()));
+    if(structure.getMapListChild()!=null) {
     }
-    if(jsonObject.get("numberInt")!=null) {
-      structure.setNumberInt(Integer.parseInt(jsonObject.get("numberInt").toString()));
+    if(structure.getNumberLong()!=null) {
+      jsonObject.put("id",new JSONNumber(structure.getNumberLong()));
     }
-    if(jsonObject.get("numberDouble")!=null) {
-      structure.setNumberDouble(Double.parseDouble(jsonObject.get("numberDouble").toString()));
-    }
-    if(jsonObject.get("charNotSet")!=null) {
-      structure.setCharNotSet(jsonObject.get("charNotSet").isString().stringValue().charAt(0));
-    }
-    if(jsonObject.get("mapChild")!=null) {
-      structure.setMapChild(SerializationGWTUtilities.toMapPojo_Json_FuncS(
-          jsonObject.get("mapChild"),
-          (s)->s!=null ? Integer.parseInt(s) : null,
-          (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
-          );
-    }
-    if(jsonObject.get("boolValue")!=null) {
-      structure.setBoolValue(Boolean.parseBoolean(jsonObject.get("boolValue").toString()));
-    }
-    if(jsonObject.get("mapListChild")!=null) {
-      structure.setMapListChild(SerializationGWTUtilities.toMapPojo_Json_FuncS(
-          jsonObject.get("mapListChild"),
-          (s)->s!=null ? Integer.parseInt(s) : null,
-          (s0)->SerializationGWTUtilities.toListPojo_String_FuncS(
-          s0,
-          (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
-          )
-          );
-    }
-    if(jsonObject.get("id")!=null) {
-      structure.setNumberLong(Long.parseLong(jsonObject.get("id").toString()));
-    }
-    return structure;
+    return jsonObject;
   }
 }
