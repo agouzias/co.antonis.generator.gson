@@ -118,7 +118,6 @@ public class SerializationGWTUtilities {
             List<T> listStructure = new ArrayList<>();
             JSONArray jsonArray = jsonV.isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
-                //log.info("Item " + i + ":" + jsonArray.get(i) + " [ is null " + isNull(jsonArray.get(i)) + "][");
                 listStructure.add(convert.apply(toStringJSONValue(jsonArray.get(i))));
             }
             return listStructure;
@@ -138,13 +137,15 @@ public class SerializationGWTUtilities {
         return null;
     }
 
-    public static <T> JSONArray toListJson_FuncJ(List<T> list, Function<T , JSONValue> convert){
+    public static <T> JSONArray toListJson_FuncJ(List<T> list, Function<T, JSONValue> convert) {
         JSONArray jsonArray = new JSONArray();
-        for(int index = 0;index<list.size();index++){
+        for (int index = 0; index < list.size(); index++) {
             jsonArray.set(index, convert.apply(list.get(index)));
         }
         return jsonArray;
     }
+
+
 
     //endregion
 
@@ -180,6 +181,19 @@ public class SerializationGWTUtilities {
             return mapStructure;
         }
         return null;
+    }
+
+    public static <K, V> JSONObject toMapJson_FuncJ(Map<K, V> map,
+                                                    Function<K, JSONValue> convertKey,
+                                                    Function<V, JSONValue> convertValue) {
+        JSONObject jsonMap = new JSONObject();
+        map.keySet().forEach(key -> {
+            jsonMap.put(
+                    convertKey.apply(key).toString(),
+                    convertValue.apply(map.get(key))
+            );
+        });
+        return jsonMap;
     }
     //endregion
 

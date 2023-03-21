@@ -1,6 +1,5 @@
 package co.antonis.generator.gson.gwt;
 
-import co.antonis.generator.gson.Utilities;
 import co.antonis.generator.gson.model.MethodConvert;
 import co.antonis.generator.gson.ReaderJava;
 import co.antonis.generator.gson.model.ClassInfo;
@@ -212,342 +211,27 @@ public class CodeGenerator {
         return MapConverter.MapConverters.get(clazz);
     }
 
-    //endregion
-
-    //region Methods To Json
-
-    /**
-     * Generate method "toJson(Pojo)" of the input ClassInfo
-     * Loop all the listed fields
-     *
-     * @param method, the method spec
-     * @param cI,     the input ClassInfo to create the method
-     * @return the generated code-block of the method
-     */
-    public MethodSpec.Builder generateCode_ToJson_Method(MethodSpec.Builder method, ClassInfo cI) {
-        Utilities.log.info("Class To JSON [" + cI.getClassToSerialize() + "]");
-
-        List<FieldInfo> listFields = cI.getListFieldInfo();
-        method.beginControlFlow("if (structure == null) ").addStatement("return null").endControlFlow();
-
-        //Generate JSONObject (jsonObject)
-        method.addStatement("$T jsonObject = new $T()", classJsonObject, classJsonObject);
-        //For ALL exposed fields
-        listFields.forEach(fieldI -> {
-            generateCode_ToJson_SetField(method, fieldI);
-        });
-        method.addStatement("return jsonObject");
-        return method;
-    }
-
-    @SuppressWarnings("Duplicates")
-    public void generateCode_ToJson_SetField(MethodSpec.Builder method, FieldInfo fI) {
-        Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
-
-        Class<?> classOfField = fI.fieldClass;
-        ClassInfo cInfo_OfField = findClassInfoWithType(classOfField, listClassInfo);
-        boolean isSupported = MapConverter.MapConverters.containsKey(classOfField) || cInfo_OfField != null || classOfField.isEnum() || listSupportedContainers.contains(classOfField);
-
-        // Always print debug is supported
-        if (isPrintLogInfo) {
-            method.addStatement(code_toLog(quote("Field:" + fI.nameField + ":") + "+" + fI.structureGet(), true));
-        }
-
-        if (!isSupported) {
-
-            method.addComment(CodeGeneratorUtilities.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
-
-        } else {
-
-            // Check if not null
-            if (isCheckNotNullValue_BeforeUse && !fI.isPrimitive()) method.beginControlFlow("if(" + fI.structureGet() + "!=null)");
-
-            if (MapConverter.MapConverters.containsKey(classOfField)) {
-
-                /*
-                 * A. Case Primitive Type
-                 *  jsonObject.put("parameterName",new JSONString(structure.getParameterName()));
-                 *  jsonObject.put("intSimple",new JSONNumber(structure.getIntSimple()));
-                 */
-
-                String convertCode = converterOf(classOfField).inline_Class_ToJsonV(fI.structureGet());
-                if (convertCode == null) method.addComment(NOT_IMPLEMENTED);
-                else method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
-
-            } else if (cInfo_OfField != null) {
-
-                /*
-                 * B. Pojo, the field is another pojo, use a 'fromJson(String)' to convert it.
-                 * jsonObject.put("child",SerializationGWTJson_Sample.fromPojoSimple(structure.getSimple()));
-                 */
-
-                String convertCode = cInfo_OfField.code_methodToJson(fI.structureGet());
-                method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
-
-            } else if (fI.fieldClass.isEnum()) {
-
-                /*
-                 * C. Case Enum
-                 * jsonObject.put("nameOfType",new JSONString(structure.getPojoType().name()));
-                 */
-
-                String convertCode = converterOf(String.class).inline_Class_ToJsonV(code_enum_to_string(fI.structureGet()));
-                method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
-
-            } else if (fI.isSupportedContainer(listSupportedContainers)) {
-
-                /*
-                 * D. Case Container of Primitive or Supported Types
-                 */
-
-                /* Using converter containers.
-                   jsonObject.put("test",
-                            SerializationGWTUtilities.toListJson_FuncJ(
-                                structure.getListString(),
-                                (s)->new JSONString(s))
-                   )
-                 */
-                generateCode_ToJson_SetField_Container(
-                        fI.field.getGenericType(),
-                        "todo",
-                        "[Member:]..",
-                        true, 0
-                );
-
-            }
-
-            if (isCheckNotNullValue_BeforeUse && !fI.isPrimitive()) method.endControlFlow();
-
-        }
-    }
-
-    /**
-     * SerializationGWTUtilities.toListJson_FuncJ(
-     * structure.getListString(),
-     * (s)->new JSONString(s)
-     * )
-     *
-     * @param type,                  the field type
-     * @param paramName,             the parameter name to be used
-     * @param fieldName_ForComments, used for comments
-     * @param isParamJsonValue,      todo
-     * @param iterationIndex,        todo
-     * @return generated code that converts pojo to json value
-     */
-    @SuppressWarnings("Duplicates")
-    public PairStructure<String, Boolean> generateCode_ToJson_SetField_Container(Type type, String paramName, String fieldName_ForComments, boolean isParamJsonValue, int iterationIndex) {
-
-        if (type instanceof ParameterizedType) {
-
-            ParameterizedType typeGeneric = (ParameterizedType) type;
-            Class<?> fieldClass = (Class<?>) typeGeneric.getRawType();
-            Type[] arguments = typeGeneric.getActualTypeArguments();
-
-            if (fieldClass == List.class) {
-
-                String methodConvert_item = generateCode_Func_StringToType_Or_TypeToJsonV(false, arguments[0], iterationIndex);
-                return code(code_toListJson_methodS(/*isParamJsonValue,*/ paramName, methodConvert_item));
-
-            } else if (fieldClass == Map.class) {
-
-                String methodConvert_key = generateCode_Func_StringToType_Or_TypeToJsonV(false, arguments[0], iterationIndex);
-                String methodConvert_value = generateCode_Func_StringToType_Or_TypeToJsonV(false, arguments[1], iterationIndex);
-
-                return code(code_toMapPojo_fromV_methodS(isParamJsonValue, paramName, methodConvert_key, methodConvert_value));
-
-            } else {
-                return comment("TODO " + fieldName_ForComments + " Not implemented container");
-            }
-
-        } else {
-            return comment("TODO " + fieldName_ForComments + " Not type parameters in container (ignoring)");
-        }
-
-    }
-
-    //endregion
-
-    //region Method From Json
-
-    /**
-     * Generate method "fromJson(Class, String)" of the input ClassInfo
-     * Loop all the listed fields
-     *
-     * @param method, the method spec
-     * @param cI,     the input ClassInfo to create the method
-     * @return the generated code-block of the method
-     */
-    public MethodSpec.Builder generateCode_FromJson_Method(MethodSpec.Builder method, ClassInfo cI) {
-        Utilities.log.info("Class From JSON [" + cI.getClassToSerialize() + "]");
-
-        List<FieldInfo> listFields = cI.getListFieldInfo();
-
-        method.addStatement("$T jsonValue = $T.parseStrict(json)", classJsonValue, classJsonParser).addStatement("$T jsonObject = jsonValue.isObject()", classJsonObject).beginControlFlow("\r\nif (jsonObject == null) ").addStatement("return null").endControlFlow();
-
-        //Generate POJO (structure)
-        method.addStatement("$T structure = new $T()", cI.getClassToSerialize(), cI.getClassToSerialize());
-        //For ALL exposed fields
-        listFields.forEach((fieldI -> {
-            generateCode_FromJson_SetField(method, fieldI);
-        }));
-        method.addStatement("return structure");
-
-        return method;
-    }
-
-    /**
-     * Generate code to set field of a pojo.
-     * Check the type of the field (primitive, container, pojo, enum)
-     * and generate the correct setXXX(....)
-     *
-     * @param fI, the fieldInfo to set
-     */
-    @SuppressWarnings("Duplicates")
-    public void generateCode_FromJson_SetField(MethodSpec.Builder method, FieldInfo fI) {
-        Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
-
-        Class<?> classOfField = fI.fieldClass;
-        ClassInfo cInfo_OfField = findClassInfoWithType(classOfField, listClassInfo);
-        boolean isSupported = MapConverter.MapConverters.containsKey(classOfField) || cInfo_OfField != null || classOfField.isEnum() || listSupportedContainers.contains(classOfField);
-
-        // Always print debug is supported
-        if (isPrintLogInfo) {
-            method.addStatement(code_toLog(quote("Field:" + fI.nameField + ":") + "+" + fI.jsonObjGet(), true));
-        }
-
-        // Return if it is not supported
-        if (!isSupported) {
-
-            method.addComment(CodeGeneratorUtilities.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
-
-        } else {
-
-            // Check if not null
-            if (isCheckNotNullValue_BeforeUse) method.beginControlFlow("if(" + fI.jsonObjGet() + "!=null)");
-
-            if (MapConverter.MapConverters.containsKey(classOfField)) {
-
-                /*
-                 * A. Case Primitive Type
-                 *  structure.setParameterName(Long.parse(parameterName))
-                 */
-
-                //Using Inline function of JSON to Primitive
-                String convertCode = converterOf(fI.fieldClass).inline_JsonV_ToClass(fI.jsonObjGet());
-                if (convertCode == null) {
-                    method.addComment(NOT_IMPLEMENTED);
-                } else {
-                    method.addStatement(fI.structureSet(convertCode), classUtilities);
-                }
-
-
-            } else if (cInfo_OfField != null) {
-
-                /*
-                 * B. Pojo, the field is another pojo, use a 'fromJson(String)' to convert it.
-                 * code = toXXXFromJson(parameterName)
-                 */
-
-                String convertCode = cInfo_OfField.code_methodFromJson(MapConverter.MethodConvert_ofPojo.inline_JsonV_ToClass(fI.jsonObjGet()), true);
-                method.addStatement(fI.structureSet(convertCode), classUtilities);
-
-            } else if (fI.fieldClass.isEnum()) {
-
-                /*
-                 * C. Case Enum
-                 * Enum.valueOf( parameterName.isString().stringValue() )
-                 */
-
-                String convertCode = converterOf(String.class).inline_JsonV_ToClass(fI.jsonObjGet());
-                method.addStatement(fI.structureSet(code_string_to_enum(convertCode)), fI.fieldClass);
-
-            } else if (fI.isSupportedContainer(listSupportedContainers)) {
-
-                /*
-                 * D. Case Container of Primitive or Supported Types
-                 */
-
-                /* Using converter containers.
-                   SerializationGWTUtilities.toListPojo_JsonV_FuncS(
-                            jsonObject.get("listDateSimple"),
-                           (s)->SerializationGWTUtilities.toDateFromS(s)))
-                 */
-                PairStructure<String, Boolean> codePair = generatedCode_FromJson_SetField_Container(
-                        fI.field.getGenericType(),
-                        fI.jsonObjGet(),
-                        "[Member:" + fI.nameField + "/ Serializable:" + fI.nameSerializable + "] (" + fI.field.getGenericType() + ")",
-                        true,
-                        0);
-
-                if (codePair.getSecond()) method.addStatement(fI.structureSet(codePair.getFirst()));
-                else method.addComment(codePair.getFirst());
-            }
-
-            if (isCheckNotNullValue_BeforeUse) method.endControlFlow();
-        }
-    }
-
-    //endregion
-
-    //region Methods From Json (container related)
-
-    /**
-     * Generate Code that converts a JSONValue OR String to Parameterized Container with the input type.
-     * The type-arguments must be checked for Primitives, Pojo's, Enum or Containers and use the needed converted methods
-     * <p>
-     * SerializationGWTUtilities.toListPojo_JsonV_FuncS(
-     * jsonObject.get("listDateSimple"),
-     * (s)->SerializationGWTUtilities.toDateFromS(s)))
-     * )
-     *
-     * @param type,                  the field type
-     * @param paramName,             the param name to be used  (convertMethod(paramName) )
-     * @param fieldName_ForComments, the field info of the container
-     * @param isParamJsonValue,      If true the return converted methods expect 'JSONValue' otherwise expect 'String'
-     * @param iterationIndex,        the field info of the container
-     * @return generated code that converts json to container
-     */
-    @SuppressWarnings("Duplicates")
-    public PairStructure<String, Boolean> generatedCode_FromJson_SetField_Container(Type type, String paramName, String fieldName_ForComments, boolean isParamJsonValue, int iterationIndex) {
-
-        if (type instanceof ParameterizedType) {
-
-            ParameterizedType typeGeneric = (ParameterizedType) type;
-            Class<?> fieldClass = (Class<?>) typeGeneric.getRawType();
-            Type[] arguments = typeGeneric.getActualTypeArguments();
-
-            if (fieldClass == List.class) {
-
-                String methodConvert_item = generateCode_Func_StringToType_Or_TypeToJsonV(true, arguments[0], iterationIndex);
-                return code(code_toListPojo_fromV_methodS(isParamJsonValue, paramName, methodConvert_item));
-
-            } else if (fieldClass == Map.class) {
-
-                String methodConvert_key = generateCode_Func_StringToType_Or_TypeToJsonV(true, arguments[0], iterationIndex);
-                String methodConvert_value = generateCode_Func_StringToType_Or_TypeToJsonV(true, arguments[1], iterationIndex);
-
-                return code(code_toMapPojo_fromV_methodS(isParamJsonValue, paramName, methodConvert_key, methodConvert_value));
-
-            } else {
-                return comment("TODO " + fieldName_ForComments + " Not implemented container");
-            }
-
-        } else {
-            return comment("TODO " + fieldName_ForComments + " Not type parameters in container (ignoring)");
-        }
-
-    }
-
-
     /**
      * Generate implementation of Function<T,String> class
      * Generate implementation of Function<JSONValue, T> class
-     * This is the generator of
+     *
+     * To be used in generation of container inputs
+     *
+     * Example Function<T,String>
+     * Function<Integer,String>         (s) -> s != null ? Integer.parseInt(s) : null
+     * Function<Pojo,String>            (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
+     * Function<List<Pojo>,String>      (s0) -> SerializationGWTUtilities.toListPojo_String_FuncS(
+     *                                     s0,
+     *                                     (s) -> SerializationGWTJson_Sample.toPojoSimple(s)
+     *
+     * Function<JSONValue, T>
+     *
+     *
      *
      * @param fieldType, type of converter
      * @return code/string of the needed converter
      */
-    public String generateCode_Func_StringToType_Or_TypeToJsonV(boolean isFromStringToType, Type fieldType, int iterationIndex) {
+    public String generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(boolean isFromStringToType, Type fieldType, int iterationIndex) {
 
         if (fieldType instanceof Class) {
 
@@ -571,11 +255,11 @@ public class CodeGenerator {
                 /*
                  * 2. "Enum"
                  * string:  (s) -> Enum.valueOf(s)
-                 * pojo:    (pojo) -> pojo!=null ? pojo.name() : null
+                 * pojo:    (pojo) -> pojo != null ? new JSONString(pojo.name()) : null
                  */
                 return isFromStringToType ?
                         CodeBlock.builder().add("(s) -> s!=null ? " + code_string_to_enum("s") + " : null", fileTypeClass).build().toString() :
-                        CodeBlock.builder().add("(pojo) -> pojo!=null ? " + code_enum_to_string("pojo") + " : null").build().toString();
+                        CodeBlock.builder().add("(pojo) -> pojo!=null ? new $T(" + code_enum_to_string("pojo") + ") : null", classJsonString).build().toString();
 
             } else {
                 ClassInfo cI = findClassInfoWithType(fileTypeClass, listClassInfo);
@@ -588,9 +272,9 @@ public class CodeGenerator {
 
                 if (cI != null) {
                     if (isFromStringToType)
-                        return cI.code_methodFromJson_asLamda("s", null); //"(s) -> " + cI.methodFromJson("s");
+                        return cI.code_methodFromJson_asLamda("s", null);
                     else
-                        return cI.code_methodToJson_asLamda("pojo", null); //"(s) -> " + cI.methodFromJson("s");
+                        return cI.code_methodToJson_asLamda("pojo", null);
                 }
 
             }
@@ -603,13 +287,13 @@ public class CodeGenerator {
 
             if (isFromStringToType) {
                 String parameter = "s" + iterationIndex; /*Creating a parameter that is not re-used*/
-                PairStructure<String, Boolean> pair = generatedCode_FromJson_SetField_Container(fieldType, parameter, "", false, iterationIndex + 1);
+                PairStructure<String, Boolean> pair = CodeGenJsonFrom.generateCode_FromJson_SetField_Container(this, fieldType, parameter, "", false, iterationIndex + 1);
                 return "(" + parameter + ")->" + pair.getFirst();
             } else {
                 String parameter = "pojo" + iterationIndex; /*Creating a parameter that is not re-used*/
-               /* PairStructure<String, Boolean> pair = generatedCode_ToJson_SetField_Container(fieldType, parameter, "", false, iterationIndex + 1);
-                return "(" + parameter + ")->" + pair.getFirst();*/
-                return "todo";
+                PairStructure<String, Boolean> pair = CodeGenJsonTo.generateCode_ToJson_SetField_Container(this, fieldType, parameter, "", false, iterationIndex + 1);
+                return "(" + parameter + ")->" + pair.getFirst();
+                //return "todo";
             }
         }
 
@@ -624,8 +308,8 @@ public class CodeGenerator {
         return prefix_In_Container + "$T.toListPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
     }
 
-    static String code_toListJson_methodS(/*boolean isParamJsonValue,*/ String param, String convertMethod_from_v) {
-        return prefix_In_Container + "$T.toListJson_" + /*(isParamJsonValue ? "JsonV" : "String")*/ "FuncJ(\n" + param + ",\n" + convertMethod_from_v + ")\n";
+    static String code_toListJson(String param, String convertMethod_from_v) {
+        return prefix_In_Container + "$T.toListJson_FuncJ(\n" + param + ",\n" + convertMethod_from_v + ")\n";
     }
 
     /**
@@ -642,6 +326,10 @@ public class CodeGenerator {
         return prefix_In_Container + "$T.toMapPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
     }
 
+    static String code_toMapJson(String param, String convertMethod_key_from_v, String convertMethod_value_from_v) {
+        return prefix_In_Container + "$T.toMapJson_FuncJ(\n" + param + ",\n" + convertMethod_key_from_v + ",\n" + convertMethod_value_from_v + ")\n";
+    }
+
     static String code_string_to_enum(String param) {
         return "$T.valueOf(" + param + ")";
     }
@@ -656,6 +344,10 @@ public class CodeGenerator {
 
     public static PairStructure<String, Boolean> comment(String code) {
         return PairStructure.n(code, false);
+    }
+
+    public static String toComment_safe(String comment) {
+        return comment.replaceAll("\\$", "_");
     }
 
     public static PairStructure<String, Boolean> code(String code) {
@@ -692,7 +384,7 @@ public class CodeGenerator {
         setClasses.forEach((classToSerialize) -> {
             List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose).stream().map(FieldInfo::new).collect(Collectors.toList());
             if (listFieldInfo.size() > 0) {
-                String className = CodeGeneratorUtilities.generateClassNameOf(classToSerialize, this);
+                String className = CodeGenUtils.generateClassNameOf(classToSerialize, this);
                 ClassInfo cI = new ClassInfo(classToSerialize, listFieldInfo, className);
                 if (!mapClassGroupInfo.containsKey(className)) {
                     mapClassGroupInfo.put(className, new ClassGroupInfo(className));
@@ -713,7 +405,7 @@ public class CodeGenerator {
                     if (isGenerateFromJsonMethods) {
                         MethodSpec.Builder method_convertFromJson = MethodSpec.methodBuilder(classInfo.getMethodFromJson()).addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameter(String.class, "json").returns(classInfo.getClassToSerialize());
 
-                        generateCode_FromJson_Method(method_convertFromJson, classInfo);
+                        CodeGenJsonFrom.generateCode_FromJson_Method(this, method_convertFromJson, classInfo);
 
                         classGroupI.listMethodsFromJson.add(method_convertFromJson.build());
                     }
@@ -721,7 +413,7 @@ public class CodeGenerator {
                     if (isGenerateToJsonMethods) {
                         MethodSpec.Builder method_convertToJson = MethodSpec.methodBuilder(classInfo.getMethodToJson()).addParameter(classInfo.getClassToSerialize(), "structure").addModifiers(Modifier.PUBLIC, Modifier.STATIC).returns(classJsonObject);
 
-                        generateCode_ToJson_Method(method_convertToJson, classInfo);
+                        CodeGenJsonTo.generateCode_ToJson_Method(this, method_convertToJson, classInfo);
 
                         classGroupI.listMethodsToJson.add(method_convertToJson.build());
                     }
@@ -736,11 +428,11 @@ public class CodeGenerator {
             //Java Doc for each class
             classBuilder.addJavadoc("Generated for total " + classGroupI.listClassInfo.size() + " structures \r\n\r\n");
             for (ClassInfo cI : classGroupI.listClassInfo) {
-                classBuilder.addJavadoc(CodeGeneratorUtilities.toComment_safe("@see " + cI.getClassToSerialize().getName() + " [fields:" + cI.getListFieldInfo().size() + "/" + cI.getClassToSerialize().getDeclaredFields().length + "] \r\n"));
+                classBuilder.addJavadoc(CodeGenerator.toComment_safe("@see " + cI.getClassToSerialize().getName() + " [fields:" + cI.getListFieldInfo().size() + "/" + cI.getClassToSerialize().getDeclaredFields().length + "] \r\n"));
             }
 
             //Logger and helper methods (if any)
-            CodeGeneratorUtilities.addHelperMethods(this, classBuilder);
+            CodeGenUtils.addHelperMethods(this, classBuilder);
 
             /*
              * D. Add Methods "from/to Json"
@@ -764,7 +456,7 @@ public class CodeGenerator {
         List<JavaFile> listJavaFile = new ArrayList<>();
 
         List<TypeSpec> listSpecs = generate_JavaCode(setClasses);
-        listSpecs.add(CodeGeneratorUtilities.generate_javaCodeTypes(this, this.generatedClassName + "Types", isGenerateFromJsonMethods, isGenerateToJsonMethods));
+        listSpecs.add(CodeGenUtils.generate_javaCodeTypes(this, this.generatedClassName + "Types", isGenerateFromJsonMethods, isGenerateToJsonMethods));
 
         /*
          * E. Export
@@ -781,59 +473,3 @@ public class CodeGenerator {
         return listJavaFile;
     }
 }
-
-
-/*
- * Generate implementation of Function<T,String> class
- * This is the generator of
- *
- * @param fieldType, type of converter
- * @return code/string of the needed converter
- */
-/*    public String generateCode_FunctionFromStringToClass(Type fieldType, int iterationIndex) {
-        if (fieldType instanceof Class) {
-
-            *//*
- * A. Primitive / Pojo / Enum
- *//*
-            Class<?> fileTypeClass = (Class<?>) fieldType;
-            if (MapConverter.MapConverters.containsKey(fileTypeClass)) {
-
-                *//*
- * 1. "Primitive", find the Function<String,K> lamda function to use
- *  example: (s) -> s!=null ? Long.parse(s) : null
- *//*
-                return converterOf(fileTypeClass).func_String_ToClass;
-
-            } else if (fileTypeClass.isEnum()) {
-
-                *//*
- * 2. "Enum"
- * example: (s) -> s!=null ? Enum.valueOf(s)
- *//*
-                return CodeBlock.builder().add("(s) -> " + code_string_to_enum("s"), fileTypeClass).build().toString();
-
-            } else {
-                ClassInfo cI = findClassInfoWithType(fileTypeClass, listClassInfo);
-
-                *//*
- * 3. The type is "Object", find the Function<String,K> Lamda function to use
- *//*
-                if (cI != null) {
-                    return cI.code_methodFromJson_asLamda("s", null); //"(s) -> " + cI.methodFromJson("s");
-                }
-
-            }
-        } else if (fieldType instanceof ParameterizedType) {
-            *//*
- *  3. The type is "Parameterized" meaning that we have probably a container
- *  and need set based on
- *//*
-            String parameter = "s" + iterationIndex; *//*Creating a parameter that is not re-used*//*
-            PairStructure<String, Boolean> pair = generatedCode_FromJson_SetField_Container(fieldType, parameter, "", false, iterationIndex + 1);
-            return "(" + parameter + ")->" + pair.getFirst();
-        }
-        return null;
-    }*/
-
-

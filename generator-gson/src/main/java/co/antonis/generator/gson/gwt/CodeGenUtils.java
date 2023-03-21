@@ -2,14 +2,13 @@ package co.antonis.generator.gson.gwt;
 
 import co.antonis.generator.gson.Utilities;
 import co.antonis.generator.gson.model.ClassInfo;
-import co.antonis.generator.gson.model.FieldInfo;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
 import java.util.Date;
 import java.util.HashMap;
 
-public class CodeGeneratorUtilities {
+public class CodeGenUtils {
 
     /**
      * Generate the name of the generated class.
@@ -63,7 +62,7 @@ public class CodeGeneratorUtilities {
 
         //2. Add method "fromJson"
         if (isGenerateFromJson)
-            classBuilder.addMethod(CodeGeneratorUtilities.code_FromJson_For_All_POJO_Method(codeGenerator));
+            classBuilder.addMethod(CodeGenUtils.code_FromJson_For_All_POJO_Method(codeGenerator));
 
 
 
@@ -105,7 +104,7 @@ public class CodeGeneratorUtilities {
     /**
      * Generate Method, [public static <T> T fromJson(Class<T>, String){}]
      */
-    public static MethodSpec code_FromJson_For_All_POJO_Method(CodeGenerator codeGenerator) {
+    private static MethodSpec code_FromJson_For_All_POJO_Method(CodeGenerator codeGenerator) {
         String parameterNameClass = "clazz";
         String parameterNameJson = "json";
 
@@ -169,8 +168,5 @@ public class CodeGeneratorUtilities {
             "throw new RuntimeException(\"Unable to convert date from json \"+jsonDate);\n";
 
 
-    public static String toComment_safe(String comment) {
-        return comment.replaceAll("\\$", "_");
-    }
 
 }

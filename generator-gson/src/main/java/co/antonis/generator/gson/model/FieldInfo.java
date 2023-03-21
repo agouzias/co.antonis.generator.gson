@@ -70,6 +70,10 @@ public class FieldInfo {
         return "jsonObject.put(\""+key+"\","+value+")";
     }
 
+    public String jsonObjPut(String value){
+        return "jsonObject.put(\""+nameSerializable+"\","+value+")";
+    }
+
     public String structureSet(String value) {
         if ((fieldClass == Boolean.class || fieldClass == boolean.class) && nameField.indexOf("is") == 0)
             return "structure.set" + Utilities.toUpperFirstLtr(nameField.substring(2)) + "(" + value + ")";
