@@ -191,6 +191,7 @@ public class CodeGenerator {
         return fieldsFiltered;
     }
 
+
     static ClassInfo findClassInfoWithType(Class<?> clazz, List<ClassInfo> listClassInfo) {
         List<ClassInfo> cI_list = listClassInfo.stream().filter((cI) -> cI.getClassToSerialize() == clazz).collect(Collectors.toList());
 
@@ -214,19 +215,19 @@ public class CodeGenerator {
     /**
      * Generate implementation of Function<T,String> class
      * Generate implementation of Function<JSONValue, T> class
-     *
+     * <p>
      * To be used in generation of container inputs
-     *
+     * <p>
      * Example Function<T,String>
      * Function<Integer,String>         (s) -> s != null ? Integer.parseInt(s) : null
      * Function<Pojo,String>            (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
      * Function<List<Pojo>,String>      (s0) -> SerializationGWTUtilities.toListPojo_String_FuncS(
-     *                                     s0,
-     *                                     (s) -> SerializationGWTJson_Sample.toPojoSimple(s)
-     *
-     * Function<JSONValue, T>
-     *
-     *
+     * s0,
+     * (s) -> SerializationGWTJson_Sample.toPojoSimple(s)
+     * <p>
+     * Function<T, JSONValue>
+     * Function<Integer, JSONValue>     (num) -> new JSONNumber(num)
+     * Function<String, JSONValue>     (pojo) -> new JSONString(pojo)
      *
      * @param fieldType, type of converter
      * @return code/string of the needed converter
@@ -358,6 +359,17 @@ public class CodeGenerator {
     static String quote(String val) {
         return "\"" + val + "\"";
     }
+
+    /**
+     * In order to import the JSON classes adding a static block
+     */
+    public static CodeBlock addStaticBlockToImport() {
+        return CodeBlock.builder()
+                .addStatement("$T ignore1", classJsonString)
+                .addStatement("$T ignore2", classJsonBoolean)
+                .addStatement("$T ignore3", classJsonNumber)
+                .build();
+    }
     //endregion
 
     static class ClassGroupInfo {
@@ -424,7 +436,8 @@ public class CodeGenerator {
 
         mapClassGroupInfo.values().forEach((classGroupI) -> {
             TypeSpec.Builder classBuilder = TypeSpec.classBuilder(classGroupI.className).addModifiers(Modifier.PUBLIC);
-
+            if(isGenerateToJsonMethods)
+                classBuilder.addStaticBlock(addStaticBlockToImport());
             //Java Doc for each class
             classBuilder.addJavadoc("Generated for total " + classGroupI.listClassInfo.size() + " structures \r\n\r\n");
             for (ClassInfo cI : classGroupI.listClassInfo) {

@@ -28,7 +28,7 @@ public class App implements EntryPoint {
     @Override
     public void onModuleLoad() {
         log.info("onModuleLoad, adding uiMain");
-        UiPanelRequest uiMain = new UiPanelRequest("GET", "http://localhost:8080/json");
+        UiPanelRequest uiMain = new UiPanelRequest("GET", "http://localhost:8080/jsonTo");
         RootPanel.get("rootPanel").add(uiMain);
         log.info("onModuleLoad, adding uiMain (completed");
     }

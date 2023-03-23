@@ -4,6 +4,7 @@ import co.antonis.generator.gson.Utilities;
 import co.antonis.generator.gson.model.ClassInfo;
 import co.antonis.generator.gson.model.FieldInfo;
 import co.antonis.generator.gson.model.PairStructure;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 
 import java.lang.reflect.ParameterizedType;
@@ -38,6 +39,8 @@ public class CodeGenJsonTo {
         return method;
     }
 
+
+
     @SuppressWarnings("Duplicates")
     private static void generateCode_ToJson_SetField(CodeGenerator cg, MethodSpec.Builder method, FieldInfo fI) {
         Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
@@ -70,7 +73,7 @@ public class CodeGenJsonTo {
 
                 String convertCode = CodeGenerator.converterOf(classOfField).inline_Class_ToJsonV(fI.structureGet());
                 if (convertCode == null)
-                    method.addComment(CodeGenerator.NOT_IMPLEMENTED);
+                    method.addComment("["+fI.toSimpleString()+"]"+CodeGenerator.NOT_IMPLEMENTED);
                 else
                     method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
 

@@ -1,5 +1,6 @@
 package co.antonis.generator.rest;
 
+import co.antonis.generator.model.sample.PojoParent;
 import co.antonis.generator.model.sample.StructureGenerator;
 import co.antonis.generator.rest.serialization.SerializerJsonDateMultiValue;
 import com.google.gson.Gson;
@@ -18,13 +19,18 @@ public class RestServiceExample {
         System.out.println("test");
     }
 
-    @GetMapping("/json")
+    @GetMapping("/jsonTo")
     public String toJson(@RequestParam(value = "type", defaultValue = "0") Integer type) {
         if (type == null || type == 0)
             return gson.toJson(StructureGenerator.generatePojoParent());
         else if (type == 1)
             return gson.toJson(StructureGenerator.generateSub());
         return gson.toJson(StructureGenerator.generatePojoParent());
+    }
 
+    @GetMapping("/jsonFrom")
+    public String fromJson(@RequestParam(value = "param", defaultValue = "0") String json) {
+        PojoParent parent = gson.fromJson(json, PojoParent.class);
+       return "ok";
     }
 }

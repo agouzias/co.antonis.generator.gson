@@ -24,7 +24,7 @@ public class StartCodeGenerator {
                 .setExportOnlyExpose(true)
                 .setPrintLogInfo(false)
                 .setGenerateToJsonMethods(true)
-                .setGenerateFromJsonMethods(false)
+                .setGenerateFromJsonMethods(true)
                 .setGeneratedClassName("SerializationGWTJson", true)
                 .setGeneratedPackageName("co.antonis.gwt.example.client.generated")
                 //Home

@@ -3,9 +3,13 @@
 
     <ui:style>
         .basic {
-            background-color: #b6b6b6;
-            color: #343434;
+            background-color: #e7e7e7;
+            color: black;
             padding: 5px;
+        }
+
+        .comp {
+            height:14px;
         }
 
         .pad10 {
@@ -15,97 +19,52 @@
     <g:HTMLPanel styleName="{style.basic}">
         <table>
             <tr>
-                <td>
-                    Method
-                </td>
-                <td>
-                    url
-                </td>
+                <td>URL</td>
+                <td>Method</td>
             </tr>
             <tr>
-                <td>
-                    <g:TextBox ui:field="uiTextURL"/>
-                </td>
-                <td>
-                    <g:ListBox ui:field="uiListMethod"/>
-                </td>
+                <td><g:TextBox ui:field="uiTextURL" styleName="{style.comp}"/></td>
+                <td><g:CheckBox ui:field="uiCheckBoxMethod" styleName="{style.comp}"/></td>
             </tr>
-
         </table>
 
         <table>
+            <!--<tr>
+                <td>input Α</td>
+                <td>input Β</td>
+                <td>input C</td>
+                <td>input D</td>
+                <td>input E</td>
+            </tr>-->
             <tr>
-                <td>
-                    input Α
-                </td>
-                <td>
-                    input Β
-                </td>
-                <td>
-                    input C
-                </td>
-                <td>
-                    input D
-                </td>
-                <td>
-                    input E
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <g:TextBox ui:field="uiTextParamA"/>
-                </td>
-                <td>
-                    <g:TextBox ui:field="uiTextParamB"/>
-                </td>
-                <td>
-                    <g:TextBox ui:field="uiTextParamC"/>
-                </td>
-                <td>
-                    <g:TextBox ui:field="uiTextParamD"/>
-                </td>
-                <td>
-                    <g:TextBox ui:field="uiTextParamE"/>
-                </td>
+                <td><g:TextBox ui:field="uiTextParamA" styleName="{style.comp}"/></td>
+                <td><g:TextBox ui:field="uiTextParamB" styleName="{style.comp}"/></td>
+                <td><g:TextBox ui:field="uiTextParamC" styleName="{style.comp}"/></td>
+                <td><g:TextBox ui:field="uiTextParamD" styleName="{style.comp}"/></td>
+                <td><g:TextBox ui:field="uiTextParamE" styleName="{style.comp}"/></td>
             </tr>
         </table>
 
         <div style="border:1px solid white;margin-top:10px">
             <table style="width:100%">
                 <tr>
-                    <td>
-                        Code
-                        <g:TextBox ui:field="uiTextResponseCode"/>
-                    </td>
-                    <td>
-                        Status
-                        <g:TextBox ui:field="uiTextResponseStatus"/>
-                    </td>
-                    <td>
-                        Cookie
-                        <g:TextBox ui:field="uTextResponseCookie"/>
-                    </td>
+                    <td>Code:<g:InlineHTML ui:field="uiTextResponseCode"/></td>
+                    <td>Status:<g:InlineHTML ui:field="uiTextResponseStatus"/></td>
+                    <td>Cookie:<g:InlineHTML ui:field="uTextResponseCookie"/></td>
                 </tr>
             </table>
             <table style="width:100%">
                 <tr>
-                    <td>
-                        JSON/Body
-                    </td>
-                    <td>
-                        Java/POJO (toString())
-                    </td>
-                </tr> <tr>
-                    <td>
-                        <g:HTMLPanel ui:field="uiContainerTextBody" styleName="{style.pad10}"/>
-                    </td>
-                    <td>
-                        <g:HTMLPanel ui:field="uiContainerTextConverted" styleName="{style.pad10}"/>
-                    </td>
+                    <td>JSON/Body <g:CheckBox ui:field="uiCheckSendAsParam1"/></td>
+                    <td>Java/POJO (toString())</td>
+                </tr>
+                <tr>
+                    <td><g:HTMLPanel ui:field="uiContainerTextBody" styleName="{style.pad10}"/></td>
+                    <td><g:HTMLPanel ui:field="uiContainerTextConverted" styleName="{style.pad10}"/></td>
                 </tr>
             </table>
             <g:Button ui:field="buttonSubmit">Request</g:Button>
-            <g:Button ui:field="buttonConvert">Convert JSON</g:Button>
+            <g:Button ui:field="buttonConvertJsonToPojo">Convert JSON to POJO</g:Button>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>

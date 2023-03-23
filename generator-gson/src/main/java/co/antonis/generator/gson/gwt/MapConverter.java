@@ -30,14 +30,14 @@ public class MapConverter {
                 MethodConvert.i(String.class,
                         "$$$.isString().stringValue()",
                         "new JSONString($$$)",
-                        "(pojo) -> new JSONString(pojo)",
+                        "(str) -> (str!=null) ? new JSONString(str) : null",
                         "(s) -> s",
                         "(s) -> s"
                 )); /*not use s.toString() in function to avoid null pointer*/
 
         MapConverters.put(Date.class,
                 MethodConvert.i(Date.class,
-                                classUtilities.simpleName() + ".toDateFromV($$$/*.isString().stringValue()*/)",
+                                classUtilities.simpleName() + ".toDateFromV($$$)",
                                 classUtilities.simpleName() + ".toVFromDate($$$)",
                                 "(pojo) -> " + classUtilities.simpleName() + ".toVFromDate(pojo)",
                                 "(s) -> " + classUtilities.simpleName() + ".toDateFromS(s)",
@@ -50,7 +50,7 @@ public class MapConverter {
                 MethodConvert.i(Integer.class,
                         "Integer.parseInt($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(num) -> new JSONNumber(num)",
+                        "(num) -> num!=null ? new JSONNumber(num) : null",
                         "(s) -> s!=null ? Integer.parseInt(s) : null",
                         "(num) -> num!=null ? Integer.toString(num) : null"
                 ));
@@ -68,7 +68,7 @@ public class MapConverter {
                 MethodConvert.i(Long.class,
                         "Long.parseLong($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(num) -> new JSONNumber(num)",
+                        "(num) -> num!=null ? new JSONNumber(num) : null",
                         "(s) -> s!=null ?Long.parseLong(s) : null",
                         "(num) -> num!=null ? Long.toString(num) : null"
                 ));
@@ -86,7 +86,7 @@ public class MapConverter {
                 MethodConvert.i(Double.class,
                         "Double.parseDouble($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(num) -> new JSONNumber(num)",
+                        "(num) -> num!=null ? new JSONNumber(num) : null",
                         "(s) -> s!=null ? Double.parseDouble(s) : null",
                         "(num) -> num!=null ? Double.toString(num) : null"
 
@@ -105,7 +105,7 @@ public class MapConverter {
                 MethodConvert.i(Float.class,
                         "Float.parseFloat($$$.toString())",
                         "new JSONNumber($$$)",
-                        "(num) -> new JSONNumber(num)",
+                        "(num) -> num!=null ? new JSONNumber(num) : null",
                         "(s) -> s!=null ?Float.parseFloat(s): null",
                         "(num) -> num!=null ? Float.toString(num) : null"
                 ));

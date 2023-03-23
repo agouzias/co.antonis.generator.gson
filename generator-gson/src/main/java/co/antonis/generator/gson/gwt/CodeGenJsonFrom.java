@@ -25,7 +25,6 @@ public class CodeGenJsonFrom {
         Utilities.log.info("Class From JSON [" + cI.getClassToSerialize() + "]");
 
         List<FieldInfo> listFields = cI.getListFieldInfo();
-
         method.addStatement("$T jsonValue = $T.parseStrict(json)", CodeGenerator.classJsonValue, CodeGenerator.classJsonParser).addStatement("$T jsonObject = jsonValue.isObject()", CodeGenerator.classJsonObject).beginControlFlow("\r\nif (jsonObject == null) ").addStatement("return null").endControlFlow();
 
         //Generate POJO (structure)
@@ -79,7 +78,7 @@ public class CodeGenJsonFrom {
                 //Using Inline function of JSON to Primitive
                 String convertCode = CodeGenerator.converterOf(fI.fieldClass).inline_JsonV_ToClass(fI.jsonObjGet());
                 if (convertCode == null) {
-                    method.addComment(CodeGenerator.NOT_IMPLEMENTED);
+                    method.addComment("[" + fI.toSimpleString() + "]" + CodeGenerator.NOT_IMPLEMENTED);
                 } else {
                     method.addStatement(fI.structureSet(convertCode), CodeGenerator.classUtilities);
                 }
