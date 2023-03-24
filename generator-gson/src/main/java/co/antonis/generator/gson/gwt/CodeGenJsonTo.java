@@ -84,7 +84,7 @@ public class CodeGenJsonTo {
                  * jsonObject.put("child",SerializationGWTJson_Sample.fromPojoSimple(structure.getSimple()));
                  */
 
-                String convertCode = cInfo_OfField.code_methodToJson(fI.structureGet());
+                String convertCode = cInfo_OfField.code_methodToJson(fI.structureGet(),true);
                 method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
 
             } else if (fI.fieldClass.isEnum()) {

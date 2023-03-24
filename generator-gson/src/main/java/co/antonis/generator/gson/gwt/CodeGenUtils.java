@@ -64,7 +64,8 @@ public class CodeGenUtils {
         if (isGenerateFromJson)
             classBuilder.addMethod(CodeGenUtils.code_FromJson_For_All_POJO_Method(codeGenerator));
 
-
+        if(isGenerateToJson)
+            classBuilder.addMethod(CodeGenUtils.code_ToJson_For_All_POJO_Method(codeGenerator));
 
         return classBuilder.build();
     }
@@ -126,6 +127,39 @@ public class CodeGenUtils {
             builder.beginControlFlow("if(" + parameterNameClass + "==$T.class)", classI.getClassToSerialize());
             builder.addStatement(
                     "return (T)$T." + classI.code_methodFromJson(parameterNameJson, false),
+                    ClassName.get(codeGenerator.generatedPackageName, classI.getGeneratedClassName()));
+            builder.endControlFlow();
+        }
+
+        builder.addStatement("return null");
+        method.addCode(builder.build());
+
+
+        return method.build();
+    }
+
+    private static MethodSpec code_ToJson_For_All_POJO_Method(CodeGenerator codeGenerator) {
+        String parameterNameStructure = "structure";
+
+        //Method Spec
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder("toJson")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(Object.class, parameterNameStructure)
+                .returns(String.class);
+
+        //Method Code
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        //Check if not null
+        builder.beginControlFlow("if(" + parameterNameStructure + " == null)");
+        builder.addStatement("return null");
+        builder.endControlFlow();
+
+        for (ClassInfo classI : codeGenerator.listClassInfo) {
+            builder.beginControlFlow("if(" + parameterNameStructure + " instanceof $T)", classI.getClassToSerialize());
+            builder.addStatement(
+                    "return $T." + classI.code_methodToJson( "("+classI.getClassToSerialize().getSimpleName()+")"+parameterNameStructure, false)+".toString()",
                     ClassName.get(codeGenerator.generatedPackageName, classI.getGeneratedClassName()));
             builder.endControlFlow();
         }

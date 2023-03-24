@@ -74,13 +74,13 @@ public class ClassInfo {
 
     public String code_methodToJson_asLamda(String paramName, String as_methodReference) {
         if (as_methodReference == null)
-            return "(" + paramName + ") -> " + code_methodToJson(paramName);
+            return "(" + paramName + ") -> " + code_methodToJson(paramName,true);
         else
             return as_methodReference + "::" + methodFromJson;
     }
 
-    public String code_methodToJson(String paramName) {
-        return generatedClassName + "." + methodToJson + "(" + paramName + ")";
+    public String code_methodToJson(String paramName, boolean isIncludeClassName) {
+        return (isIncludeClassName ? generatedClassName + "." : "") + methodToJson + "(" + paramName + ")";
     }
 
 
