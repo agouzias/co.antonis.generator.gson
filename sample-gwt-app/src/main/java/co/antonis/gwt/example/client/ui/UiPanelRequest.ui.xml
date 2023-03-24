@@ -24,7 +24,7 @@
             </tr>
             <tr>
                 <td><g:TextBox ui:field="uiTextURL" styleName="{style.comp}"/></td>
-                <td><g:CheckBox ui:field="uiCheckBoxMethod" styleName="{style.comp}"/></td>
+                <td><g:CheckBox ui:field="uiCheckBoxMethod" styleName="{style.comp}"/> GET1 / POST</td>
             </tr>
         </table>
 

@@ -30,7 +30,9 @@ public class RestServiceExample {
 
     @GetMapping("/jsonFrom")
     public String fromJson(@RequestParam(value = "param", defaultValue = "0") String json) {
-        PojoParent parent = gson.fromJson(json, PojoParent.class);
-       return "ok";
+        PojoParent parentFromJson = gson.fromJson(json, PojoParent.class);
+        PojoParent parentOriginal = StructureGenerator.generatePojoParent();
+        System.out.println(parentOriginal.equalsTest(parentFromJson));
+        return "ok";
     }
 }

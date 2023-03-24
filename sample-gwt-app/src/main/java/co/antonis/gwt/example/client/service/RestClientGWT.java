@@ -4,10 +4,7 @@ package co.antonis.gwt.example.client.service;
 import co.antonis.gwt.example.client.model.exception.InvalidUserException;
 import co.antonis.gwt.example.client.model.others.InfoMessageStructure;
 import co.antonis.gwt.example.client.utilities.Log;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class RestClientGWT {
@@ -137,7 +134,7 @@ public class RestClientGWT {
 
     public static void requestPost(String url, String[] keys, String[] values, RequestCallback callback) throws Exception {
         Log.info("RestClient: " + url + ", params " + keys.length);
-        String boundary = "--GWT--["+System.currentTimeMillis()+"]--";
+        String boundary = "--GWT--[" + System.currentTimeMillis() + "]--";
         String contentType = "multipart/form-data; boundary=" + boundary;
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, url);
         builder.setHeader("Content-type", contentType);
@@ -150,7 +147,7 @@ public class RestClientGWT {
     public static void request(RequestBuilder.Method method, String url, String[] keys, String[] values, RequestCallback callback) throws Exception {
         Log.info("RestClient: " + url + ", params " + keys.length);
         RequestBuilder builder;
-        if(method == RequestBuilder.POST) {
+        if (method == RequestBuilder.POST) {
             String boundary = "--GWT--[" + System.currentTimeMillis() + "]--";
             String contentType = "multipart/form-data; boundary=" + boundary;
             builder = new RequestBuilder(RequestBuilder.POST, url);
@@ -158,7 +155,12 @@ public class RestClientGWT {
             String requestData = createPayload(keys, values, boundary);
             builder.setRequestData(requestData);
         } else {
-            builder = new RequestBuilder(RequestBuilder.GET,url);
+            StringBuilder urlBuilder = new StringBuilder(url);
+            if (keys.length > 0)
+                urlBuilder.append("?");
+            for (int i = 0; i < keys.length; i++)
+                urlBuilder.append(i != 0 ? "&" : "").append(keys[i]).append("=").append(values[i]);
+            builder = new RequestBuilder(RequestBuilder.GET, URL.encode(urlBuilder.toString()));
         }
         //todo fix url
         builder.setCallback(callback != null ? callback : CallBackLog);

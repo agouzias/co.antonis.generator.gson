@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Sample class with various members to check serialization from/to json
@@ -282,26 +283,61 @@ public class PojoParent {
     public String toString() {
         String prefix = "\r\n";
         return "PojoParent{" +
-               prefix + "date=" + date +
-               prefix + ", string='" + string + '\'' +
-               prefix + ", stringNotSet='" + stringNotSet + "\' is null:" + (stringNotSet == null) +
-               prefix + ", numberInt=" + numberInt +
-               prefix + ", numberDouble=" + numberDouble +
-               prefix + ", booleanValue=" + isBooleanValue +
-               prefix + ", numberLong=" + numberLong +
-               prefix + ", numberLongClass=" + numberLongClass +
-               prefix + ", listString=" + listString +
-               prefix + ", listLong=" + listLong +
-               prefix + ", listDouble=" + listDouble +
-               prefix + ", charA=" + charA +
-               prefix + ", charNotSet=" + charNotSet +
-               prefix + ", listAny=" + listAny +
-               prefix + ", mapString=" + StructureGenerator.toString(mapString) +
-               prefix + ", pojoType=" + pojoType +
-               prefix + ", pojoSimple=" + simple +
-               prefix + ", listPojoType=" + StructureGenerator.toString(listPojoType) +
-               prefix + ", mapChild=" + StructureGenerator.toString(mapChild) +
-               prefix + ", listMapChild=" + StructureGenerator.toString(listMapChild) +
-               '}';
+                prefix + "date=" + date +
+                prefix + ", string='" + string + '\'' +
+                prefix + ", stringNotSet='" + stringNotSet + "\' is null:" + (stringNotSet == null) +
+                prefix + ", numberInt=" + numberInt +
+                prefix + ", numberDouble=" + numberDouble +
+                prefix + ", booleanValue=" + isBooleanValue +
+                prefix + ", numberLong=" + numberLong +
+                prefix + ", numberLongClass=" + numberLongClass +
+                prefix + ", listString=" + listString +
+                prefix + ", listLong=" + listLong +
+                prefix + ", listDouble=" + listDouble +
+                prefix + ", charA=" + charA +
+                prefix + ", charNotSet=" + charNotSet +
+                prefix + ", listAny=" + listAny +
+                prefix + ", mapString=" + StructureGenerator.toString(mapString) +
+                prefix + ", pojoType=" + pojoType +
+                prefix + ", pojoSimple=" + simple +
+                prefix + ", listPojoType=" + StructureGenerator.toString(listPojoType) +
+                prefix + ", mapChild=" + StructureGenerator.toString(mapChild) +
+                prefix + ", listMapChild=" + StructureGenerator.toString(listMapChild) +
+                '}';
+    }
+
+    public String equalsTest(Object o) {
+        PojoParent that = (PojoParent) o;
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringBuilder
+                .append("numberInt:").append(numberInt == that.numberInt).append("\r\n")
+                .append("numberDouble:").append(numberDouble == that.numberDouble).append("\r\n")
+                .append("boolValue:").append(boolValue == that.boolValue).append("\r\n")
+                .append("isBooleanValue:").append(isBooleanValue == that.isBooleanValue).append("\r\n")
+                .append("charA:").append(charA == that.charA).append("\r\n")
+                .append("charNotSet:").append(charNotSet == that.charNotSet).append("\r\n")
+                .append("date:").append(date == that.date).append("\r\n")
+                .append("string:").append(string.equals(that.string)).append("\r\n")
+                .append("stringNotSet:").append(stringNotSet!=null && stringNotSet.equals(that.stringNotSet)).append("\r\n")
+                .append("numberLong:").append(numberLong!=null && numberLong.equals(that.numberLong)).append("\r\n")
+                .append("numberLongClass:").append(numberLongClass!=null && numberLongClass.equals(that.numberLongClass)).append("\r\n")
+                .append("listString:").append(listString!=null && listString.equals(that.listString)).append("\r\n")
+                .append("listLong:").append(listLong!=null && listLong.equals(that.listLong)).append("\r\n")
+                .append("listDouble:").append(listDouble.equals(that.listDouble)).append("\r\n")
+                .append("listAny:").append(listAny!=null && listAny.equals(that.listAny)).append("\r\n")
+                .append("mapString:").append(mapString.equals(that.mapString)).append("\r\n")
+                .toString();
+
+                /*pojoType == that.pojoType &&
+                Objects.equals(listPojoType, that.listPojoType) &&
+                Objects.equals(simple, that.simple) &&
+                Objects.equals(mapChild, that.mapChild) &&
+                Objects.equals(mapListChild, that.mapListChild) &&
+                Objects.equals(listMapChild, that.listMapChild);*/
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, string, stringNotSet, numberInt, numberDouble, isBooleanValue, boolValue, numberLong, numberLongClass, listString, listLong, listDouble, charA, charNotSet, listAny, mapString, pojoType, listPojoType, simple, mapChild, mapListChild, listMapChild);
     }
 }

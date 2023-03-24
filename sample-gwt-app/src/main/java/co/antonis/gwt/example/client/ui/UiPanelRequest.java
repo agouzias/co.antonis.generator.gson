@@ -87,7 +87,6 @@ public class UiPanelRequest extends Composite {
         String[] values = new String[]{};
 
         if (uiCheckSendAsParam1.getValue()) {
-            keys = new String[]{"param"};
 
             Log.info("Using Input Json as object/param, converting to POJO");
             PojoParent pojo = SerializationGWTJson_Sample.toPojoParent(uiTextResponseBody.getText());
@@ -95,8 +94,9 @@ public class UiPanelRequest extends Composite {
             Log.info("Converted POJO to JSON");
             JSONObject jsonConverted = SerializationGWTJson_Sample.fromPojoParent(pojo);
 
-            Log.info("Converted POJO to JSON");
+            Log.info("Converted POJO to JSON ");
 
+            keys = new String[]{"param"};
             values = new String[]{jsonConverted != null ? jsonConverted.toString() : null};
         }
 

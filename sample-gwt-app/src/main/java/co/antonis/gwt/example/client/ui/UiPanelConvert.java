@@ -1,11 +1,9 @@
 package co.antonis.gwt.example.client.ui;
 
-import co.antonis.gwt.example.client.generated.SerializationGWTUtilities;
-import co.antonis.gwt.example.client.model.others.InfoMessageStructure;
+import co.antonis.generator.model.sample.PojoParent;
+import co.antonis.generator.model.sample.StructureGenerator;
 import co.antonis.gwt.example.client.ui.components.ace.AceTextAreaView;
 import co.antonis.gwt.example.client.utilities.Log;
-import co.antonis.generator.model.sample.StructureGenerator;
-import co.antonis.generator.model.sample.PojoParent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,10 +21,13 @@ public class UiPanelConvert extends Composite {
     Logger log = Log.getLogger();
 
     private static UiPanelConvertUiBinder ourUiBinder = GWT.create(UiPanelConvertUiBinder.class);
+
     @UiField
     HTMLPanel uiContainerJson, uiContainerStructure;
+
     @UiField
     Button uiButtonJsonFrom;
+
     @UiField
     Button uiButtonToJson;
     AceTextAreaView uiTextJson, uiTextStructure;
