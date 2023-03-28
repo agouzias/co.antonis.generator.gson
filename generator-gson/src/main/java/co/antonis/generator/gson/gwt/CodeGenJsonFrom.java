@@ -112,9 +112,9 @@ public class CodeGenJsonFrom {
                  */
 
                 /* Using converter containers.
-                   SerializationGWTUtilities.toListPojo_JsonV_FuncS(
+                   SerGwtUtils.toListPojo_JsonV_FuncS(
                             jsonObject.get("listDateSimple"),
-                           (s)->SerializationGWTUtilities.toDateFromS(s)))
+                           (s)->SerGwtUtils.toDateFromS(s)))
                  */
                 PairStructure<String, Boolean> codePair = generateCode_FromJson_SetField_Container(
                         cg,
@@ -138,9 +138,9 @@ public class CodeGenJsonFrom {
      * Generate Code that converts a JSONValue OR String to Parameterized Container with the input type.
      * The type-arguments must be checked for Primitives, Pojo's, Enum or Containers and use the needed converted methods
      * <p>
-     * SerializationGWTUtilities.toListPojo_JsonV_FuncS(
+     * SerGwtUtils.toListPojo_JsonV_FuncS(
      * jsonObject.get("listDateSimple"),
-     * (s)->SerializationGWTUtilities.toDateFromS(s)))
+     * (s)->SerGwtUtils.toDateFromS(s)))
      * )
      *
      * @param type,                  the field type

@@ -1,12 +1,9 @@
 package co.antonis.gwt.example.client.ui;
 
 import co.antonis.generator.model.sample.PojoParent;
-import co.antonis.gwt.example.client.generated.SerializationGWTJsonTypes;
-import co.antonis.gwt.example.client.generated.SerializationGWTJson_Sample;
 import co.antonis.gwt.example.client.ui.components.ace.AceTextAreaView;
 import co.antonis.gwt.example.client.service.RestClientGWT;
 import co.antonis.gwt.example.client.utilities.Log;
-import com.google.gson.JsonObject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.Request;

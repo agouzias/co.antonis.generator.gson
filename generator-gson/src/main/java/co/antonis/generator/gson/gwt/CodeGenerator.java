@@ -43,7 +43,7 @@ public class CodeGenerator {
     static ClassName classJsonObject = ClassName.get("com.google.gwt.json.client", "JSONObject");
     static ClassName classJsonParser = ClassName.get("com.google.gwt.json.client", "JSONParser");
     static ClassName classDateFormat = ClassName.get("com.google.gwt.i18n.client", "DateTimeFormat");
-    static ClassName classUtilities = ClassName.get("", "SerializationGWTUtilities");
+    static ClassName classUtilities = ClassName.get("", "SerGwtUtils");
     static ClassName classJsonString = ClassName.get("com.google.gwt.json.client", "JSONString");
     static ClassName classJsonNumber = ClassName.get("com.google.gwt.json.client", "JSONNumber");
     static ClassName classJsonBoolean = ClassName.get("com.google.gwt.json.client", "JSONBoolean");
@@ -221,7 +221,7 @@ public class CodeGenerator {
      * Example Function<T,String>
      * Function<Integer,String>         (s) -> s != null ? Integer.parseInt(s) : null
      * Function<Pojo,String>            (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
-     * Function<List<Pojo>,String>      (s0) -> SerializationGWTUtilities.toListPojo_String_FuncS(
+     * Function<List<Pojo>,String>      (s0) -> SerGwtUtils.toListPojo_String_FuncS(
      * s0,
      * (s) -> SerializationGWTJson_Sample.toPojoSimple(s)
      * <p>

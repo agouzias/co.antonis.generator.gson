@@ -1,6 +1,5 @@
 package co.antonis.gwt.example.client.generated;
 
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.*;
 
@@ -8,12 +7,17 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-public class SerializationGWTUtilities {
+/**
+ * Part of the CodeGeneration Library, needed to be copied in the same package with the
+ * generated code (from/to) pojo converters.
+ * <p>
+ * Holding helper methods.
+ */
+public class SerGwtUtils {
     public static Logger log = Logger.getLogger("");
 
     public static DateTimeFormat dateFormat_ISO8601 = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     public static DateTimeFormat dateFormat_Original = DateTimeFormat.getFormat("MMM, d, yyyy hh:mm:ss a");
-
 
     //region Testing from JSON
     //endregion
@@ -28,7 +32,7 @@ public class SerializationGWTUtilities {
     }
     //endregion
 
-    //region from JSON to Primitives (currently not used, converting FROM string using inline approach)
+    //region Methods from JSON to Primitives --Not used in Generator-- converting FROM string using inline approach
     public static boolean toBoolean(JSONValue value) {
         if (value != null) {
             JSONBoolean bool = value.isBoolean();
@@ -64,13 +68,13 @@ public class SerializationGWTUtilities {
     }
     //endregion
 
-    //region from JSON to Date Converter
+    //region Methods to/from JSON to Date Converter
     public static Date toDateFromV(JSONValue jsonDate) {
         if (jsonDate == null)
             return null;
         if (jsonDate.isNumber() != null)
             try {
-                return new java.util.Date((long) jsonDate.isNumber().doubleValue());
+                return new Date((long) jsonDate.isNumber().doubleValue());
             } catch (Exception ignored) {
             }
         if (jsonDate.isString() != null) {
@@ -89,7 +93,7 @@ public class SerializationGWTUtilities {
         //the toString() add quotes
         jsonDate = jsonDate.replaceAll("\"", "");
         try {
-            return new java.util.Date(Long.parseLong(jsonDate));
+            return new Date(Long.parseLong(jsonDate));
         } catch (Exception ignored) {
         }
         try {
@@ -106,7 +110,22 @@ public class SerializationGWTUtilities {
     }
     //endregion
 
-    //region List
+    //region Methods Classic Containers (String/Number) --Not used in Generator--
+    public static List<String> toListString(String json) {
+        return toListPojo_String_FuncS(json, s -> s);
+    }
+
+    public static List<Long> toListLong(String json) {
+        return toListPojo_String_FuncS(json, Long::parseLong);
+    }
+
+    public static Map<String, String> toMapString(String json) {
+        return toMapPojo_String_FuncS(json, s -> s, s -> s);
+    }
+
+    //endregion
+
+    //region Methods to/from List
     public static <T> List<T> toListPojo_String_FuncS(String jsonS, Function<String, T> convert) {
         if (jsonS == null)
             return null;
@@ -144,12 +163,9 @@ public class SerializationGWTUtilities {
         }
         return jsonArray;
     }
-
-
-
     //endregion
 
-    //region Methods Map
+    //region Methods to/from Map
     public static <K, V> Map<K, V> toMapPojo_String_FuncS(String jsonS, Function<String, K> convertKey, Function<String, V> convertValue) {
         if (jsonS == null)
             return null;
@@ -208,10 +224,7 @@ public class SerializationGWTUtilities {
         return !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null;
     }
 
-
     public static boolean isNull(JSONValue obj) {
         return obj == null || obj.isNull() != null;
     }
-
-
 }

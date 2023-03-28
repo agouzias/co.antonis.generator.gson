@@ -16,16 +16,13 @@ public class StartCodeGenerator {
                 "co.antonis.generator.model.sample.sub.PojoChild"
         );
 
-        Set<Class<?>> set_class_solo = ReaderJava.listClass(
-                "co.antonis.generator.model.sample.PojoParent"
-        );
 
         new CodeGenerator()
                 .setExportOnlyExpose(true)
                 .setPrintLogInfo(false)
                 .setGenerateToJsonMethods(true)
                 .setGenerateFromJsonMethods(true)
-                .setGeneratedClassName("SerializationGWTJson", true)
+                .setGeneratedClassName("SerGwtJson", true)
                 .setGeneratedPackageName("co.antonis.gwt.example.client.generated")
                 //Home
                 //.setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\apps\\co.antonis.generator\\generator-gson-gwt\\sample-gwt-app\\src\\main\\java"))

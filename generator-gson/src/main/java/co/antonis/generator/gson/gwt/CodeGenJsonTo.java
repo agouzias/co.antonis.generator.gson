@@ -105,7 +105,7 @@ public class CodeGenJsonTo {
 
                 /* Using converter containers.
                    jsonObject.put("test",
-                            SerializationGWTUtilities.toListJson_FuncJ(
+                            SerGwtUtils.toListJson_FuncJ(
                                 structure.getListString(),
                                 (s)->new JSONString(s))
                    )
@@ -131,7 +131,7 @@ public class CodeGenJsonTo {
 
 
     /**
-     * SerializationGWTUtilities.toListJson_FuncJ(
+     * SerGwtUtils.toListJson_FuncJ(
      * structure.getListString(),
      * (s)->new JSONString(s)
      * )
