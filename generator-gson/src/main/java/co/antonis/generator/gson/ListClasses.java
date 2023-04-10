@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReaderJava {
+public class ListClasses {
 
     /**
      * @return null safe set
@@ -39,32 +39,56 @@ public class ReaderJava {
     }
 
 
-    public static Set<Class<?>> listClassesOfPackage_GoogleGuice(String packageName) throws IOException {
-        return ClassPath.from(ClassLoader.getSystemClassLoader())
+    public static Set<Class<?>> listClassesOfPackage(String packageName, String[] listExcludePackage, String[] listExcludeClass) throws IOException {
+        Set<Class<?>> setClasses = ClassPath.from(ClassLoader.getSystemClassLoader())
                 .getAllClasses()
                 .stream()
                 .filter(clazz -> clazz.getPackageName()
                         .startsWith(packageName))
                 .map(clazz -> clazz.load())
                 .collect(Collectors.toSet());
+        return filterClasses(setClasses, listExcludePackage, listExcludeClass);
+    }
+
+    public static Set<Class<?>> filterClasses(Set<Class<?>> setClass, String[] listExcludePackage, String[] listExcludeClass) {
+        if ((listExcludePackage != null && listExcludePackage.length > 0) || (listExcludeClass != null && listExcludeClass.length > 0))
+            return setClass.stream().filter(
+                            (clazz) -> {
+                                boolean isIncludeClass = true;
+
+                                if (listExcludeClass != null) {
+                                    for (String classExclude : listExcludeClass) {
+                                        if (clazz.getName().equalsIgnoreCase(classExclude)) {
+                                            isIncludeClass = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (listExcludePackage != null) {
+                                    for (String packageExclude : listExcludePackage) {
+                                        if (clazz.getPackageName().equalsIgnoreCase(packageExclude)) {
+                                            isIncludeClass = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                return isIncludeClass;
+
+                            })
+                    .collect(Collectors.toSet());
+
+        return setClass;
     }
 
     public static Set<Class<?>> listClass(String... className) throws IOException, ClassNotFoundException {
         List<Class<?>> list = new ArrayList<>();
-        for(String cn:className){
+        for (String cn : className) {
             list.add(Class.forName(cn));
         }
         return new HashSet<>(list);
     }
-
-   /* public static Set<Class<?>> listClassesOfPackage_ClassLoader(String packageName) {
-        InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/"));
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        return reader.lines()
-                .filter(line -> line.endsWith(".class"))
-                .map(line -> getClass(line, packageName))
-                .collect(Collectors.toSet());
-    }*/
 
     private static Class<?> getClass(String className, String packageName) {
         try {

@@ -64,7 +64,7 @@ public class CodeGenUtils {
         if (isGenerateFromJson)
             classBuilder.addMethod(CodeGenUtils.code_FromJson_For_All_POJO_Method(codeGenerator));
 
-        if(isGenerateToJson)
+        if (isGenerateToJson)
             classBuilder.addMethod(CodeGenUtils.code_ToJson_For_All_POJO_Method(codeGenerator));
 
         return classBuilder.build();
@@ -159,8 +159,10 @@ public class CodeGenUtils {
         for (ClassInfo classI : codeGenerator.listClassInfo) {
             builder.beginControlFlow("if(" + parameterNameStructure + " instanceof $T)", classI.getClassToSerialize());
             builder.addStatement(
-                    "return $T." + classI.code_methodToJson( "("+classI.getClassToSerialize().getSimpleName()+")"+parameterNameStructure, false)+".toString()",
-                    ClassName.get(codeGenerator.generatedPackageName, classI.getGeneratedClassName()));
+                    "return $T." + classI.code_methodToJson("($T)" + parameterNameStructure, false) + ".toString()",
+                    ClassName.get(codeGenerator.generatedPackageName, classI.getGeneratedClassName()),
+                    classI.getClassToSerialize()
+            );
             builder.endControlFlow();
         }
 
@@ -200,7 +202,6 @@ public class CodeGenUtils {
             "    return dateFormat_Original.parse(jsonDate.isString().stringValue());\n" +
             "}\n" +
             "throw new RuntimeException(\"Unable to convert date from json \"+jsonDate);\n";
-
 
 
 }

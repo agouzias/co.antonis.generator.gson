@@ -1,7 +1,7 @@
 package co.antonis.generator.gson.gwt;
 
 import co.antonis.generator.gson.model.MethodConvert;
-import co.antonis.generator.gson.ReaderJava;
+import co.antonis.generator.gson.ListClasses;
 import co.antonis.generator.gson.model.ClassInfo;
 import co.antonis.generator.gson.model.FieldInfo;
 import co.antonis.generator.gson.model.PairStructure;
@@ -16,6 +16,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.io.File;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"UnusedReturnValue", "SameParameterValue", "unused"})
 public class CodeGenerator {
+    public static Logger log = Logger.getLogger(CodeGenerator.class.getName());
 
     //region Members of code generation/POET
     static ClassName classJsonValue = ClassName.get("com.google.gwt.json.client", "JSONValue");
@@ -171,7 +173,7 @@ public class CodeGenerator {
     //region Finders, Filters & Lists
     static List<Field> listFields_OfClass(Class<?> clazz, boolean isOnlyWithExposeAnnotation) {
         // Get fields
-        List<Field> fields = new ArrayList<>(ReaderJava.findFields(clazz, isOnlyWithExposeAnnotation ? Expose.class : null));
+        List<Field> fields = new ArrayList<>(ListClasses.findFields(clazz, isOnlyWithExposeAnnotation ? Expose.class : null));
         List<Field> fieldsFiltered = new ArrayList<>();
 
         // Search
@@ -384,7 +386,7 @@ public class CodeGenerator {
         }
     }
 
-    public List<TypeSpec> generate_JavaCode(Set<Class<?>> setClasses) throws IOException {
+    private List<TypeSpec> generate_JavaCode(Set<Class<?>> setClasses) throws IOException {
 
         List<TypeSpec> listTypeBuilder = new ArrayList<>();
         mapClassGroupInfo.clear();
@@ -395,6 +397,8 @@ public class CodeGenerator {
          */
         setClasses.forEach((classToSerialize) -> {
             List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose).stream().map(FieldInfo::new).collect(Collectors.toList());
+            log.info("Preparing ["+classToSerialize.getName()+"] is to be generated/has fields ["+(listFieldInfo.size() > 0)+"]");
+
             if (listFieldInfo.size() > 0) {
                 String className = CodeGenUtils.generateClassNameOf(classToSerialize, this);
                 ClassInfo cI = new ClassInfo(classToSerialize, listFieldInfo, className);
@@ -406,14 +410,17 @@ public class CodeGenerator {
                 listClassInfo.add(cI);
                 mapClassGroupInfo.get(className).listClassInfo.add(cI);
             }
+
         });
 
         /*
-         * C. For each class Generated the "from Json"
+         * C. For each class Generated the "from/to Json"
          */
         mapClassGroupInfo.values().forEach((classGroupI) -> {
+            log.info("Generating Class ["+classGroupI.className+"]");
             classGroupI.listClassInfo.forEach((classInfo) -> {
                 if (classInfo.getListFieldInfo().size() > 0) {
+                    log.info("Generating ["+classInfo.getClassToSerialize()+"]");
                     if (isGenerateFromJsonMethods) {
                         MethodSpec.Builder method_convertFromJson = MethodSpec.methodBuilder(classInfo.getMethodFromJson()).addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameter(String.class, "json").returns(classInfo.getClassToSerialize());
 
@@ -435,9 +442,12 @@ public class CodeGenerator {
 
 
         mapClassGroupInfo.values().forEach((classGroupI) -> {
+            log.info("Publishing Class ["+classGroupI.className+"] classes:"+classGroupI.listClassInfo.size());
+
             TypeSpec.Builder classBuilder = TypeSpec.classBuilder(classGroupI.className).addModifiers(Modifier.PUBLIC);
             if(isGenerateToJsonMethods)
                 classBuilder.addStaticBlock(addStaticBlockToImport());
+
             //Java Doc for each class
             classBuilder.addJavadoc("Generated for total " + classGroupI.listClassInfo.size() + " structures \r\n\r\n");
             for (ClassInfo cI : classGroupI.listClassInfo) {
