@@ -396,7 +396,9 @@ public class CodeGenerator {
          * A. First Pass to gather ALL the generated classes AND the class-Names that will be used to generate the methods
          */
         setClasses.forEach((classToSerialize) -> {
-            List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose).stream().map(FieldInfo::new).collect(Collectors.toList());
+            List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose)
+                    .stream()
+                    .map(fi->new FieldInfo(fi,classToSerialize)).collect(Collectors.toList());
             log.info("Preparing ["+classToSerialize.getName()+"] is to be generated/has fields ["+(listFieldInfo.size() > 0)+"]");
 
             if (listFieldInfo.size() > 0) {

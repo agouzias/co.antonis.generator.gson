@@ -5,6 +5,7 @@ import co.antonis.generator.gson.gwt.CodeGenerator;
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -24,17 +25,21 @@ public class FieldInfo {
     public Class<?> fieldClass;
     public Field field;
 
-    public FieldInfo(Field field) {
+    public Class<?> classContainField;
+
+
+    public FieldInfo(Field field, Class<?> classContainField) {
         this.field = field;
         nameField = field.getName();
         fieldClass = field.getType();
+        this.classContainField = classContainField;
 
         //Serializable name
         SerializedName anSerializableName = field.getAnnotation(SerializedName.class);
         nameSerializable = anSerializableName != null ? anSerializableName.value() : field.getName();
     }
 
-    public boolean isPrimitive(){
+    public boolean isPrimitive() {
         return fieldClass.isPrimitive();
     }
 
@@ -66,12 +71,12 @@ public class FieldInfo {
         return paramName + ".get(\"" + nameSerializable + "\")" + (isIncludeToString ? ".toString()" : "");
     }
 
-    public static String jsonObjPut(String key, String value){
-        return "jsonObject.put(\""+key+"\","+value+")";
+    public static String jsonObjPut(String key, String value) {
+        return "jsonObject.put(\"" + key + "\"," + value + ")";
     }
 
-    public String jsonObjPut(String value){
-        return "jsonObject.put(\""+nameSerializable+"\","+value+")";
+    public String jsonObjPut(String value) {
+        return "jsonObject.put(\"" + nameSerializable + "\"," + value + ")";
     }
 
     public String structureSet(String value) {
@@ -81,21 +86,33 @@ public class FieldInfo {
             return "structure.set" + nameUpper() + "(" + value + ")";
     }
 
-
-
     public String structureGet() {
         // 'isBoolValue = "isBooleanValue()" , boolValue = 'isBoolValue()'
-        if (fieldClass == Boolean.class || fieldClass == boolean.class)
+        if (fieldClass == Boolean.class || fieldClass == boolean.class) {
+            String methodName = "";
             if (nameField.indexOf("is") == 0)
-                return "structure.is" + Utilities.toUpperFirstLtr(nameField.substring(2)) + "()";
+                methodName = "is" + Utilities.toUpperFirstLtr(nameField.substring(2));
             else
-                return "structure.is" + nameUpper() + "()";
-        else
-            return "structure.get" + nameUpper() + "()";
+                methodName = "is" + nameUpper();
+
+            if (isMethodPresent(classContainField, methodName))
+                return "structure." + methodName + "()";
+        }
+        return "structure.get" + nameUpper() + "()";
     }
 
     public String toSimpleString() {
         return "[" + nameField + "][" + fieldClass + "]";
+    }
+
+    public static boolean isMethodPresent(Class<?> clazz, String methodNameToFind) {
+        try {
+            Method methodToFind = clazz.getMethod(methodNameToFind, (Class<?>[]) null);
+            return true;
+        } catch (NoSuchMethodException | SecurityException e) {
+            // Your exception handling goes here
+            return false;
+        }
     }
 
 }
