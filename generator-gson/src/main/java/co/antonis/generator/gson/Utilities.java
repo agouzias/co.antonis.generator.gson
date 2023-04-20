@@ -2,6 +2,7 @@ package co.antonis.generator.gson;
 
 import co.antonis.generator.gson.gwt.CodeGenerator;
 
+import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 /**
@@ -24,6 +25,5 @@ public class Utilities {
             return "from" + clazz.getSimpleName().replaceAll("\\$", "_");
         }
     }
-
     //endregion
 }

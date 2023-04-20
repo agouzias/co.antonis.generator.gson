@@ -5,10 +5,28 @@ import co.antonis.generator.gson.model.ClassInfo;
 import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 
 public class CodeGenUtils {
+
+    /**
+     * Check if a method exist in a specific class
+     *
+     * @param clazz,            the input class
+     * @param methodNameToFind, the method name
+     * @return true if exist
+     */
+    public static boolean isMethodPresent(Class<?> clazz, String methodNameToFind) {
+        try {
+            Method methodToFind = clazz.getMethod(methodNameToFind, (Class<?>[]) null);
+            return true;
+        } catch (NoSuchMethodException | SecurityException e) {
+            // Your exception handling goes here
+            return false;
+        }
+    }
 
     /**
      * Generate the name of the generated class.

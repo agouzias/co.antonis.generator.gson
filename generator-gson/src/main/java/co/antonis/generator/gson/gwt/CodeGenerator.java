@@ -52,6 +52,9 @@ public class CodeGenerator {
 
     static String prefix_In_Container = "" /*"\n"*/;
     static String NOT_IMPLEMENTED = "Not implemented. Consider to add it manually or ignore field";
+    static String Error_Code_HeadsUp = "\r\nHeads UP, Null Converter or potential issue during code generation. Review\r\n";
+
+    public static String Method_Name_toCall_After_Deserialize_of_Structure = "postDeserialize";
     //endregion
 
     //region Members Configuration
@@ -69,8 +72,11 @@ public class CodeGenerator {
     public boolean isExportOnlyExpose = true;
     public boolean isGenerateFromJsonMethods = true;
     public boolean isGenerateToJsonMethods = true;
+    public boolean isGeneratePostDeserializeIfExist = true;
+    public static Map<Class<?>, Class<?>> Map_Interface_to_Implemented_Classes = new HashMap<>();
 
     public boolean isCheckNotNullValue_BeforeUse = true;
+    public static boolean isGenerateErrorForHeadsUp = true;
     public boolean isPrintLogInfo = false;
     //endregion
 
@@ -110,6 +116,44 @@ public class CodeGenerator {
      */
     public CodeGenerator setGenerateToJsonMethods(boolean generateToJson) {
         isGenerateToJsonMethods = generateToJson;
+        return this;
+    }
+
+    /**
+     * If true generated 'XXXToJson(Object) Methods,
+     * By default is true
+     *
+     * @param isGenerateErrorForHeadsUp param
+     * @return the CodeGenerator
+     */
+    public CodeGenerator setGenerateErrorWhenNotFoundSerializersForHeadsUp(boolean isGenerateErrorForHeadsUp) {
+        this.isGenerateErrorForHeadsUp = isGenerateErrorForHeadsUp;
+        return this;
+    }
+
+    /**
+     * If true in method fromJson before return calls "postDeserialize()" if the method exists
+     * By default is true
+     *
+     * @param isGeneratePostDeserializeIfExist param
+     * @return the CodeGenerator
+     */
+    public CodeGenerator setGeneratePostDeserializeMethodWhenExist(boolean isGeneratePostDeserializeIfExist) {
+        this.isGeneratePostDeserializeIfExist = isGeneratePostDeserializeIfExist;
+        return this;
+    }
+
+    /**
+     * If a structure has an interface member then a default implementation of this interface should be provided.
+     * For instance if a structure/pojo has a member "PositionIF" with many implementations classes then a default class should be
+     * provided using this method.
+     *
+     * @param classIf
+     * @param classImpl
+     * @return
+     */
+    public CodeGenerator addImplementationOfInterface(Class<?> classIf, Class<?> classImpl) {
+        Map_Interface_to_Implemented_Classes.put(classIf, classImpl);
         return this;
     }
 
@@ -195,12 +239,20 @@ public class CodeGenerator {
 
 
     static ClassInfo findClassInfoWithType(Class<?> clazz, List<ClassInfo> listClassInfo) {
-        List<ClassInfo> cI_list = listClassInfo.stream().filter((cI) -> cI.getClassToSerialize() == clazz).collect(Collectors.toList());
+        if (clazz.isInterface()) {
+            Class<?> classImpl = Map_Interface_to_Implemented_Classes.get(clazz);
+            if (classImpl != null)
+                return findClassInfoWithType(classImpl, listClassInfo);
+        } else {
 
-        if (cI_list.size() > 0) {
-            //TODO should i warn? if greater than one
-            return cI_list.get(0);
+            List<ClassInfo> cI_list = listClassInfo.stream().filter((cI) -> cI.getClassToSerialize() == clazz).collect(Collectors.toList());
+
+            if (cI_list.size() > 0) {
+                //TODO should i warn? if greater than one
+                return cI_list.get(0);
+            }
         }
+
         return null;
     }
 
@@ -307,12 +359,15 @@ public class CodeGenerator {
     //endregion
 
     //region Methods Utilities
+
     static String code_toListPojo_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_from_s) {
-        return prefix_In_Container + "$T.toListPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
+        String errorIfNeeded = (convertMethod_from_s == null && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        return errorIfNeeded + prefix_In_Container + "$T.toListPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
     }
 
     static String code_toListJson(String param, String convertMethod_from_v) {
-        return prefix_In_Container + "$T.toListJson_FuncJ(\n" + param + ",\n" + convertMethod_from_v + ")\n";
+        String errorIfNeeded =  (convertMethod_from_v == null && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        return errorIfNeeded + prefix_In_Container + "$T.toListJson_FuncJ(\n" + param + ",\n" + convertMethod_from_v + ")\n";
     }
 
     /**
@@ -326,11 +381,13 @@ public class CodeGenerator {
      * @param convertMethod_value_from_s, the convert Value
      */
     static String code_toMapPojo_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_key_from_s, String convertMethod_value_from_s) {
-        return prefix_In_Container + "$T.toMapPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
+        String errorIfNeeded =  ((convertMethod_key_from_s == null || convertMethod_value_from_s == null) && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        return errorIfNeeded + prefix_In_Container + "$T.toMapPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
     }
 
     static String code_toMapJson(String param, String convertMethod_key_from_v, String convertMethod_value_from_v) {
-        return prefix_In_Container + "$T.toMapJson_FuncJ(\n" + param + ",\n" + convertMethod_key_from_v + ",\n" + convertMethod_value_from_v + ")\n";
+        String errorIfNeeded =  ((convertMethod_key_from_v == null || convertMethod_value_from_v == null) && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        return errorIfNeeded + prefix_In_Container + "$T.toMapJson_FuncJ(\n" + param + ",\n" + convertMethod_key_from_v + ",\n" + convertMethod_value_from_v + ")\n";
     }
 
     static String code_string_to_enum(String param) {
@@ -398,8 +455,8 @@ public class CodeGenerator {
         setClasses.forEach((classToSerialize) -> {
             List<FieldInfo> listFieldInfo = listFields_OfClass(classToSerialize, this.isExportOnlyExpose)
                     .stream()
-                    .map(fi->new FieldInfo(fi,classToSerialize)).collect(Collectors.toList());
-            log.info("Preparing ["+classToSerialize.getName()+"] is to be generated/has fields ["+(listFieldInfo.size() > 0)+"]");
+                    .map(fi -> new FieldInfo(fi, classToSerialize)).collect(Collectors.toList());
+            log.info("Preparing [" + classToSerialize.getName() + "] is to be generated/has fields [" + (listFieldInfo.size() > 0) + "]");
 
             if (listFieldInfo.size() > 0) {
                 String className = CodeGenUtils.generateClassNameOf(classToSerialize, this);
@@ -419,10 +476,10 @@ public class CodeGenerator {
          * C. For each class Generated the "from/to Json"
          */
         mapClassGroupInfo.values().forEach((classGroupI) -> {
-            log.info("Generating Class ["+classGroupI.className+"]");
+            log.info("Generating Class [" + classGroupI.className + "]");
             classGroupI.listClassInfo.forEach((classInfo) -> {
                 if (classInfo.getListFieldInfo().size() > 0) {
-                    log.info("Generating ["+classInfo.getClassToSerialize()+"]");
+                    log.info("Generating [" + classInfo.getClassToSerialize() + "]");
                     if (isGenerateFromJsonMethods) {
                         MethodSpec.Builder method_convertFromJson = MethodSpec.methodBuilder(classInfo.getMethodFromJson()).addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameter(String.class, "json").returns(classInfo.getClassToSerialize());
 
@@ -444,10 +501,10 @@ public class CodeGenerator {
 
 
         mapClassGroupInfo.values().forEach((classGroupI) -> {
-            log.info("Publishing Class ["+classGroupI.className+"] classes:"+classGroupI.listClassInfo.size());
+            log.info("Publishing Class [" + classGroupI.className + "] classes:" + classGroupI.listClassInfo.size());
 
             TypeSpec.Builder classBuilder = TypeSpec.classBuilder(classGroupI.className).addModifiers(Modifier.PUBLIC);
-            if(isGenerateToJsonMethods)
+            if (isGenerateToJsonMethods)
                 classBuilder.addStaticBlock(addStaticBlockToImport());
 
             //Java Doc for each class

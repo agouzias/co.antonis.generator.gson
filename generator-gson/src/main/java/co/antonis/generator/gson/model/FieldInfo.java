@@ -1,6 +1,7 @@
 package co.antonis.generator.gson.model;
 
 import co.antonis.generator.gson.Utilities;
+import co.antonis.generator.gson.gwt.CodeGenUtils;
 import co.antonis.generator.gson.gwt.CodeGenerator;
 import com.google.gson.annotations.SerializedName;
 
@@ -95,7 +96,7 @@ public class FieldInfo {
             else
                 methodName = "is" + nameUpper();
 
-            if (isMethodPresent(classContainField, methodName))
+            if (CodeGenUtils.isMethodPresent(classContainField, methodName))
                 return "structure." + methodName + "()";
         }
         return "structure.get" + nameUpper() + "()";
@@ -105,14 +106,6 @@ public class FieldInfo {
         return "[" + nameField + "][" + fieldClass + "]";
     }
 
-    public static boolean isMethodPresent(Class<?> clazz, String methodNameToFind) {
-        try {
-            Method methodToFind = clazz.getMethod(methodNameToFind, (Class<?>[]) null);
-            return true;
-        } catch (NoSuchMethodException | SecurityException e) {
-            // Your exception handling goes here
-            return false;
-        }
-    }
+
 
 }

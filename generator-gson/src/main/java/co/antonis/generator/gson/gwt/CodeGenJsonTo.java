@@ -72,9 +72,11 @@ public class CodeGenJsonTo {
                  */
 
                 String convertCode = CodeGenerator.converterOf(classOfField).inline_Class_ToJsonV(fI.structureGet());
-                if (convertCode == null)
-                    method.addComment("["+fI.toSimpleString()+"]"+CodeGenerator.NOT_IMPLEMENTED);
-                else
+                if (convertCode == null) {
+                    if(CodeGenerator.isGenerateErrorForHeadsUp)
+                        method.addCode(CodeGenerator.Error_Code_HeadsUp);
+                    method.addComment("[" + fI.toSimpleString() + "]" + CodeGenerator.NOT_IMPLEMENTED);
+                }else
                     method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
 
             } else if (cInfo_OfField != null) {

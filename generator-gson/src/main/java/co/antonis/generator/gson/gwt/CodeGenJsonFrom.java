@@ -33,6 +33,10 @@ public class CodeGenJsonFrom {
         listFields.forEach((fieldI -> {
             CodeGenJsonFrom.generateCode_FromJson_SetField(cg, method, fieldI);
         }));
+        if (cg.isGeneratePostDeserializeIfExist) {
+            if (CodeGenUtils.isMethodPresent(cI.getClassToSerialize(), CodeGenerator.Method_Name_toCall_After_Deserialize_of_Structure))
+                method.addStatement("structure." + CodeGenerator.Method_Name_toCall_After_Deserialize_of_Structure + "()");
+        }
         method.addStatement("return structure");
 
         return method;
@@ -78,6 +82,8 @@ public class CodeGenJsonFrom {
                 //Using Inline function of JSON to Primitive
                 String convertCode = CodeGenerator.converterOf(fI.fieldClass).inline_JsonV_ToClass(fI.jsonObjGet());
                 if (convertCode == null) {
+                    if(CodeGenerator.isGenerateErrorForHeadsUp)
+                        method.addCode(CodeGenerator.Error_Code_HeadsUp);
                     method.addComment("[" + fI.toSimpleString() + "]" + CodeGenerator.NOT_IMPLEMENTED);
                 } else {
                     method.addStatement(fI.structureSet(convertCode), CodeGenerator.classUtilities);
@@ -87,9 +93,8 @@ public class CodeGenJsonFrom {
             } else if (cInfo_OfField != null) {
 
                 /*
-                TODO check sample
                  * B. Pojo, the field is another pojo, use a 'fromJson(String)' to convert it.
-                 * structure.setΧΧΧ(toXXXFromJson(parameterName)
+                 * structure.setΧΧΧ(SerGwtJson_Version.toDataVersion(jsonObject.get("version").isObject().toString()))
                  */
 
                 String convertCode = cInfo_OfField.code_methodFromJson(MapConverter.MethodConvert_ofPojo.inline_JsonV_ToClass(fI.jsonObjGet()), true);
@@ -128,6 +133,8 @@ public class CodeGenJsonFrom {
                     method.addStatement(fI.structureSet(codePair.getFirst()));
                 else
                     method.addComment(codePair.getFirst());
+            } else {
+
             }
 
             if (cg.isCheckNotNullValue_BeforeUse) method.endControlFlow();
