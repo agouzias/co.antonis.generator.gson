@@ -4,7 +4,6 @@ import co.antonis.generator.gson.Utilities;
 import co.antonis.generator.gson.model.ClassInfo;
 import co.antonis.generator.gson.model.FieldInfo;
 import co.antonis.generator.gson.model.PairStructure;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 
 import java.lang.reflect.ParameterizedType;
@@ -40,7 +39,6 @@ public class CodeGenJsonTo {
     }
 
 
-
     @SuppressWarnings("Duplicates")
     private static void generateCode_ToJson_SetField(CodeGenerator cg, MethodSpec.Builder method, FieldInfo fI) {
         Utilities.log.info("Preparing Field [" + fI.nameField + "] type [" + fI.fieldClass + "]");
@@ -73,10 +71,10 @@ public class CodeGenJsonTo {
 
                 String convertCode = CodeGenerator.converterOf(classOfField).inline_Class_ToJsonV(fI.structureGet());
                 if (convertCode == null) {
-                    if(CodeGenerator.isGenerateErrorForHeadsUp)
-                        method.addCode(CodeGenerator.Error_Code_HeadsUp);
+                    if (CodeGenerator.isGenerateErrorForHeadsUp)
+                        method.addCode(CodeGenerator.Error_Code_HeadsUp.replace("$XXX$", "(" + fI.toSimpleString() + ")"));
                     method.addComment("[" + fI.toSimpleString() + "]" + CodeGenerator.NOT_IMPLEMENTED);
-                }else
+                } else
                     method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
 
             } else if (cInfo_OfField != null) {
@@ -86,7 +84,7 @@ public class CodeGenJsonTo {
                  * jsonObject.put("child",SerializationGWTJson_Sample.fromPojoSimple(structure.getSimple()));
                  */
 
-                String convertCode = cInfo_OfField.code_methodToJson(fI.structureGet(),true);
+                String convertCode = cInfo_OfField.code_methodToJson(fI.structureGet(), true);
                 method.addStatement(FieldInfo.jsonObjPut(fI.nameSerializable, convertCode));
 
             } else if (fI.fieldClass.isEnum()) {
@@ -146,7 +144,7 @@ public class CodeGenJsonTo {
      * @return generated code that converts pojo to json value
      */
     @SuppressWarnings("Duplicates")
-    public static PairStructure<String, Boolean> generateCode_ToJson_SetField_Container(CodeGenerator gc, Type type, String paramName, String fieldName_ForComments, boolean isParamJsonValue, int iterationIndex) {
+    public static PairStructure<String, Boolean> generateCode_ToJson_SetField_Container(CodeGenerator cg, Type type, String paramName, String fieldName_ForComments, boolean isParamJsonValue, int iterationIndex) {
 
         if (type instanceof ParameterizedType) {
 
@@ -156,15 +154,23 @@ public class CodeGenJsonTo {
 
             if (fieldClass == List.class) {
 
-                String methodConvert_item = gc.generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(false, arguments[0], iterationIndex);
+                String methodConvert_item = cg.generateCode_Lamda_Converter(cg.Convert_Class_ToJsonV, arguments[0], iterationIndex);
                 return CodeGenerator.code(CodeGenerator.code_toListJson(paramName, methodConvert_item));
 
             } else if (fieldClass == Map.class) {
 
-                String methodConvert_key = gc.generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(false, arguments[0], iterationIndex);
-                String methodConvert_value = gc.generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(false, arguments[1], iterationIndex);
+                //TODO Heads Up, in a map i should force to use primitive key?
+                String methodConvert_key = cg.generateCode_Lamda_Converter(cg.Convert_Class_ToJsonV, arguments[0], iterationIndex);
 
-                return CodeGenerator.code(CodeGenerator.code_toMapJson(paramName, methodConvert_key, methodConvert_value));
+                // New style -faster converter-
+                String methodConvert_key_string = cg.generateCode_Lamda_Converter(cg.Convert_Class_ToString, arguments[0], iterationIndex);
+                String methodConvert_value = cg.generateCode_Lamda_Converter(cg.Convert_Class_ToJsonV, arguments[1], iterationIndex);
+
+                String codeBefore = CodeGenerator.code_toMapJson(paramName, cg.isOptimizeMapToJson_UseKeyStringFunc ? methodConvert_key_string : methodConvert_key, methodConvert_value);
+                System.out.println("-------------------");
+                System.out.println(codeBefore);
+                System.out.println("-------------------");
+                return CodeGenerator.code(codeBefore);
 
             } else {
 

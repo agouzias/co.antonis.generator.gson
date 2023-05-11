@@ -52,7 +52,7 @@ public class CodeGenerator {
 
     static String prefix_In_Container = "" /*"\n"*/;
     static String NOT_IMPLEMENTED = "Not implemented. Consider to add it manually or ignore field";
-    static String Error_Code_HeadsUp = "\r\nHeads UP, Null Converter or potential issue during code generation. Review\r\n";
+    static String Error_Code_HeadsUp = "\r\n[TODO - Heads UP, Null Converter or Other]\r\n";
 
     public static String Method_Name_toCall_After_Deserialize_of_Structure = "postDeserialize";
     //endregion
@@ -77,6 +77,8 @@ public class CodeGenerator {
 
     public boolean isCheckNotNullValue_BeforeUse = true;
     public static boolean isGenerateErrorForHeadsUp = true;
+    public static boolean isOptimizeMapToJson_UseKeyStringFunc = true;
+
     public boolean isPrintLogInfo = false;
     //endregion
 
@@ -116,6 +118,11 @@ public class CodeGenerator {
      */
     public CodeGenerator setGenerateToJsonMethods(boolean generateToJson) {
         isGenerateToJsonMethods = generateToJson;
+        return this;
+    }
+
+    public CodeGenerator setOptimizeMapToJsonUseKeyStringFunction(boolean isOptimizeMapToJson_UseKeyStringFunc) {
+        this.isOptimizeMapToJson_UseKeyStringFunc = isOptimizeMapToJson_UseKeyStringFunc;
         return this;
     }
 
@@ -272,10 +279,12 @@ public class CodeGenerator {
      * <p>
      * To be used in generation of container inputs
      * <p>
-     * Example Function<T,String>
-     * Function<Integer,String>         (s) -> s != null ? Integer.parseInt(s) : null
-     * Function<Pojo,String>            (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
-     * Function<List<Pojo>,String>      (s0) -> SerGwtUtils.toListPojo_String_FuncS(
+     * <p>
+     * Example Function<String,T>
+     * <p>
+     * Function<String,Integer>         (s) -> s != null ? Integer.parseInt(s) : null
+     * Function<String,Pojo>            (s) -> SerializationGWTJson_Sample.toPojoSimple(s))
+     * Function<String,List<Pojo>>      (s0) -> SerGwtUtils.toListPojo_String_FuncS(
      * s0,
      * (s) -> SerializationGWTJson_Sample.toPojoSimple(s)
      * <p>
@@ -286,38 +295,63 @@ public class CodeGenerator {
      * @param fieldType, type of converter
      * @return code/string of the needed converter
      */
-    public String generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(boolean isFromStringToType, Type fieldType, int iterationIndex) {
+    public final int Convert_String_ToClass = 1;
+    public final int Convert_Class_ToString = 2;
+    public final int Convert_Class_ToJsonV = 3;
 
+    //public String generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(boolean isFromStringToType, Type fieldType, int iterationIndex) {
+    public String generateCode_Lamda_Converter(int typeConvert, Type fieldType, int iterationIndex) {
+
+        /*Function<String,Integer> function = new Function<String, Integer>() {
+            @Override
+            public Integer apply(String s) {
+                return null;
+            }
+        } */
         if (fieldType instanceof Class) {
 
             /*
              * A. Primitive / Pojo / Enum
              */
-            Class<?> fileTypeClass = (Class<?>) fieldType;
-            if (MapConverter.MapConverters.containsKey(fileTypeClass)) {
+            Class<?> fieldTypeClass = (Class<?>) fieldType;
+            if (MapConverter.MapConverters.containsKey(fieldTypeClass)) {
 
                 /*
-                 * 1. "Primitive",  Function<T,String> / Function<JSONValue, T>
+                 * 1. "Primitive",  Function<String,T> / Function<T, JSONValue>
                  *  String:   (s) -> s!=null ? Long.parse(s) : null
                  *  Pojo:     (pojo) -> pojo!=null ? new JSONNumber(pojo) : null
                  */
-                return isFromStringToType ?
-                        converterOf(fileTypeClass).func_String_ToClass :
-                        converterOf(fileTypeClass).func_Class_ToJsonV;
 
-            } else if (fileTypeClass.isEnum()) {
+                /*return isFromStringToType ?
+                        converterOf(fileTypeClass).func_String_ToClass :
+                        converterOf(fileTypeClass).func_Class_ToJsonV;*/
+
+                switch (typeConvert) {
+                    case Convert_String_ToClass:
+                        return converterOf(fieldTypeClass).func_String_ToClass;
+                    case Convert_Class_ToString:
+                        return converterOf(fieldTypeClass).func_Class_ToString;
+                    case Convert_Class_ToJsonV:
+                        return converterOf(fieldTypeClass).func_Class_ToJsonV;
+                }
+
+            } else if (fieldTypeClass.isEnum()) {
 
                 /*
                  * 2. "Enum"
                  * string:  (s) -> Enum.valueOf(s)
                  * pojo:    (pojo) -> pojo != null ? new JSONString(pojo.name()) : null
                  */
-                return isFromStringToType ?
-                        CodeBlock.builder().add("(s) -> s!=null ? " + code_string_to_enum("s") + " : null", fileTypeClass).build().toString() :
-                        CodeBlock.builder().add("(pojo) -> pojo!=null ? new $T(" + code_enum_to_string("pojo") + ") : null", classJsonString).build().toString();
-
+                switch (typeConvert) {
+                    case Convert_String_ToClass:
+                        return CodeBlock.builder().add("(s) -> s!=null ? " + code_string_to_enum("s") + " : null", fieldTypeClass).build().toString();
+                    case Convert_Class_ToString:
+                        return CodeBlock.builder().add("(pojo) -> pojo!=null ? " + code_enum_to_string("pojo") + " : null", fieldTypeClass).build().toString();
+                    case Convert_Class_ToJsonV:
+                        return CodeBlock.builder().add("(pojo) -> pojo!=null ? new $T(" + code_enum_to_string("pojo") + ") : null", classJsonString).build().toString();
+                }
             } else {
-                ClassInfo cI = findClassInfoWithType(fileTypeClass, listClassInfo);
+                ClassInfo cI = findClassInfoWithType(fieldTypeClass, listClassInfo);
 
                 /*
                  * 3. "Object",
@@ -326,10 +360,14 @@ public class CodeGenerator {
                  */
 
                 if (cI != null) {
-                    if (isFromStringToType)
-                        return cI.code_methodFromJson_asLamda("s", null);
-                    else
-                        return cI.code_methodToJson_asLamda("pojo", null);
+                    switch (typeConvert) {
+                        case Convert_String_ToClass:
+                            return cI.code_methodFromJson_asLamda("s", null);
+                        case Convert_Class_ToString:
+                            return CodeGenerator.Error_Code_HeadsUp;
+                        case Convert_Class_ToJsonV:
+                            return cI.code_methodToJson_asLamda("pojo", null);
+                    }
                 }
 
             }
@@ -340,15 +378,19 @@ public class CodeGenerator {
              *  and need set based on
              */
 
-            if (isFromStringToType) {
-                String parameter = "s" + iterationIndex; /*Creating a parameter that is not re-used*/
-                PairStructure<String, Boolean> pair = CodeGenJsonFrom.generateCode_FromJson_SetField_Container(this, fieldType, parameter, "", false, iterationIndex + 1);
-                return "(" + parameter + ")->" + pair.getFirst();
-            } else {
-                String parameter = "pojo" + iterationIndex; /*Creating a parameter that is not re-used*/
-                PairStructure<String, Boolean> pair = CodeGenJsonTo.generateCode_ToJson_SetField_Container(this, fieldType, parameter, "", false, iterationIndex + 1);
-                return "(" + parameter + ")->" + pair.getFirst();
-                //return "todo";
+            switch (typeConvert) {
+                case Convert_String_ToClass: {
+                    String parameter = "s" + iterationIndex; /*Creating a parameter that is not re-used*/
+                    PairStructure<String, Boolean> pair = CodeGenJsonFrom.generateCode_FromJson_SetField_Container(this, fieldType, parameter, "", false, iterationIndex + 1);
+                    return "(" + parameter + ")->" + pair.getFirst();
+                }
+                case Convert_Class_ToString:
+                    return CodeGenerator.Error_Code_HeadsUp;
+                case Convert_Class_ToJsonV: {
+                    String parameter = "pojo" + iterationIndex; /*Creating a parameter that is not re-used*/
+                    PairStructure<String, Boolean> pair = CodeGenJsonTo.generateCode_ToJson_SetField_Container(this, fieldType, parameter, "", false, iterationIndex + 1);
+                    return "(" + parameter + ")->" + pair.getFirst();
+                }
             }
         }
 
@@ -361,12 +403,12 @@ public class CodeGenerator {
     //region Methods Utilities
 
     static String code_toListPojo_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_from_s) {
-        String errorIfNeeded = (convertMethod_from_s == null && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        String errorIfNeeded = (convertMethod_from_s == null && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp.replace("$XXX$", "(list convert)") : "";
         return errorIfNeeded + prefix_In_Container + "$T.toListPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_from_s + ")\n";
     }
 
     static String code_toListJson(String param, String convertMethod_from_v) {
-        String errorIfNeeded =  (convertMethod_from_v == null && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        String errorIfNeeded = (convertMethod_from_v == null && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp.replace("$XXX$", "(list convert)") : "";
         return errorIfNeeded + prefix_In_Container + "$T.toListJson_FuncJ(\n" + param + ",\n" + convertMethod_from_v + ")\n";
     }
 
@@ -381,13 +423,17 @@ public class CodeGenerator {
      * @param convertMethod_value_from_s, the convert Value
      */
     static String code_toMapPojo_fromV_methodS(boolean isParamJsonValue, String param, String convertMethod_key_from_s, String convertMethod_value_from_s) {
-        String errorIfNeeded =  ((convertMethod_key_from_s == null || convertMethod_value_from_s == null) && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
+        String errorIfNeeded = ((convertMethod_key_from_s == null || convertMethod_value_from_s == null) && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp.replace("$XXX$", "(key,value convert)") : "";
         return errorIfNeeded + prefix_In_Container + "$T.toMapPojo_" + (isParamJsonValue ? "JsonV" : "String") + "_FuncS(\n" + param + ",\n" + convertMethod_key_from_s + ",\n" + convertMethod_value_from_s + ")\n";
     }
 
+
     static String code_toMapJson(String param, String convertMethod_key_from_v, String convertMethod_value_from_v) {
-        String errorIfNeeded =  ((convertMethod_key_from_v == null || convertMethod_value_from_v == null) && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp : "";
-        return errorIfNeeded + prefix_In_Container + "$T.toMapJson_FuncJ(\n" + param + ",\n" + convertMethod_key_from_v + ",\n" + convertMethod_value_from_v + ")\n";
+        String errorIfNeeded = ((convertMethod_key_from_v == null || convertMethod_value_from_v == null) && isGenerateErrorForHeadsUp) ? Error_Code_HeadsUp.replace("$XXX$", "(key,value convert)") : "";
+        if (!isOptimizeMapToJson_UseKeyStringFunc)
+            return errorIfNeeded + prefix_In_Container + "$T.toMapJson_FuncJ(\n" + param + ",\n" + convertMethod_key_from_v + ",\n" + convertMethod_value_from_v + ")\n";
+        else
+            return errorIfNeeded + prefix_In_Container + "$T.toMapJson_FuncJ_FuncS(\n" + param + ",\n" + convertMethod_key_from_v + ",\n" + convertMethod_value_from_v + ")\n";
     }
 
     static String code_string_to_enum(String param) {

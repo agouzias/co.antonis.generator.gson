@@ -83,7 +83,7 @@ public class CodeGenJsonFrom {
                 String convertCode = CodeGenerator.converterOf(fI.fieldClass).inline_JsonV_ToClass(fI.jsonObjGet());
                 if (convertCode == null) {
                     if(CodeGenerator.isGenerateErrorForHeadsUp)
-                        method.addCode(CodeGenerator.Error_Code_HeadsUp);
+                        method.addCode(CodeGenerator.Error_Code_HeadsUp.replace("$XXX$","("+fI.toSimpleString()+")"));
                     method.addComment("[" + fI.toSimpleString() + "]" + CodeGenerator.NOT_IMPLEMENTED);
                 } else {
                     method.addStatement(fI.structureSet(convertCode), CodeGenerator.classUtilities);
@@ -168,13 +168,13 @@ public class CodeGenJsonFrom {
 
             if (fieldClass == List.class) {
 
-                String methodConvert_item = cg.generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(true, arguments[0], iterationIndex);
+                String methodConvert_item = cg.generateCode_Lamda_Converter(cg.Convert_String_ToClass, arguments[0], iterationIndex);
                 return CodeGenerator.code(CodeGenerator.code_toListPojo_fromV_methodS(isParamJsonValue, paramName, methodConvert_item));
 
             } else if (fieldClass == Map.class) {
 
-                String methodConvert_key = cg.generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(true, arguments[0], iterationIndex);
-                String methodConvert_value = cg.generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(true, arguments[1], iterationIndex);
+                String methodConvert_key = cg.generateCode_Lamda_Converter(cg.Convert_String_ToClass, arguments[0], iterationIndex);
+                String methodConvert_value = cg.generateCode_Lamda_Converter(cg.Convert_String_ToClass, arguments[1], iterationIndex);
 
                 return CodeGenerator.code(CodeGenerator.code_toMapPojo_fromV_methodS(isParamJsonValue, paramName, methodConvert_key, methodConvert_value));
 

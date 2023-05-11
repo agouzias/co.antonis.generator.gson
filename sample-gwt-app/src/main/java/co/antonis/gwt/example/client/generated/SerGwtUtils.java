@@ -12,6 +12,11 @@ import java.util.logging.Logger;
  * generated code (from/to) pojo converters.
  * <p>
  * Holding helper methods.
+ * <p>
+ * to exclude
+ * com.vms.daq.common.structure.form.impl.*
+ * com.vms.daq.common.structure.form.FormParameterValue
+ * com.vms.daq.common.structure.constant.*
  */
 public class SerGwtUtils {
     public static Logger log = Logger.getLogger("");
@@ -42,9 +47,36 @@ public class SerGwtUtils {
         return false;
     }
 
+    /**
+     * The correct way to make it JSON jsonObject.get("dataObject").isObject()
+     */
     public static String toString(JSONValue value) {
         if (value != null)
             return value.toString();
+        return null;
+    }
+
+    /**
+     * Wrong Way:
+     * !isNull(v) ? v.toString() : null;
+     * <p>
+     * Correct Way :The "string" json value is quoted. the proper way is to use
+     * !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null
+     */
+    public static String toStringJSONValue(JSONValue v) {
+        return !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null;
+    }
+
+    public static boolean isNull(JSONValue obj) {
+        return obj == null || obj.isNull() != null;
+    }
+
+
+    //TODO check if needed
+    public static JSONValue fromString(String s) {
+        //vs return just JSONString(s)
+        if (s != null)
+            return new JSONString(s);
         return null;
     }
 
@@ -115,6 +147,10 @@ public class SerGwtUtils {
         return toListPojo_String_FuncS(json, s -> s);
     }
 
+    public static JSONValue fromListString(List<String> list) {
+        return toListJson_FuncJ(list, SerGwtUtils::fromString);
+    }
+
     public static List<Long> toListLong(String json) {
         return toListPojo_String_FuncS(json, Long::parseLong);
     }
@@ -157,11 +193,14 @@ public class SerGwtUtils {
     }
 
     public static <T> JSONArray toListJson_FuncJ(List<T> list, Function<T, JSONValue> convert) {
-        JSONArray jsonArray = new JSONArray();
-        for (int index = 0; index < list.size(); index++) {
-            jsonArray.set(index, convert.apply(list.get(index)));
+        if (list != null) {
+            JSONArray jsonArray = new JSONArray();
+            for (int index = 0; index < list.size(); index++) {
+                jsonArray.set(index, convert.apply(list.get(index)));
+            }
+            return jsonArray;
         }
-        return jsonArray;
+        return null;
     }
     //endregion
 
@@ -202,29 +241,37 @@ public class SerGwtUtils {
     public static <K, V> JSONObject toMapJson_FuncJ(Map<K, V> map,
                                                     Function<K, JSONValue> convertKey,
                                                     Function<V, JSONValue> convertValue) {
-        JSONObject jsonMap = new JSONObject();
-        map.keySet().forEach(key -> {
-            jsonMap.put(
-                    convertKey.apply(key).toString(),
-                    convertValue.apply(map.get(key))
-            );
-        });
-        return jsonMap;
+        if (map != null) {
+            JSONObject jsonMap = new JSONObject();
+            map.keySet().forEach(key -> {
+                //JSONValue jsonV =convertKey.apply(key);
+                //String keyV = jsonV.isString()!=null ? jsonV.isString().toString() : jsonV.toString();
+                jsonMap.put(
+                        toStringJSONValue(convertKey.apply(key)),
+                        convertValue.apply(map.get(key))
+                );
+            });
+            return jsonMap;
+        }
+        return null;
+    }
+
+    public static <K, V> JSONObject toMapJson_FuncJ_FuncS(Map<K, V> map,
+                                                          Function<K, String> convertKey,
+                                                          Function<V, JSONValue> convertValue) {
+        if (map != null) {
+            JSONObject jsonMap = new JSONObject();
+            map.keySet().forEach(key -> {
+                jsonMap.put(
+                        convertKey.apply(key),
+                        convertValue.apply(map.get(key))
+                );
+            });
+            return jsonMap;
+        }
+        return null;
     }
     //endregion
 
-    /**
-     * Wrong Way:
-     * !isNull(v) ? v.toString() : null;
-     * <p>
-     * Correct Way :The "string" json value is quoted. the proper way is to use
-     * !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null
-     */
-    public static String toStringJSONValue(JSONValue v) {
-        return !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null;
-    }
 
-    public static boolean isNull(JSONValue obj) {
-        return obj == null || obj.isNull() != null;
-    }
 }
