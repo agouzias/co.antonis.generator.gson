@@ -27,7 +27,7 @@ public class StartCodeGenerator {
                 //Home
                 //.setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\apps\\co.antonis.generator\\generator-gson-gwt\\sample-gwt-app\\src\\main\\java"))
                 //Work
-                .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\git\\co.antonis.generator\\sample-gwt-app\\src\\main\\java"))
+                .setFilePathOfGeneratedFiles(new File("D:\\dev\\code\\git\\co.antonis.generator\\sample-app\\sample-gwt-app\\src\\main\\java"))
                 .build(set_class_basic);
     }
 }
