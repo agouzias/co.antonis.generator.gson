@@ -50,7 +50,7 @@ public class SerGwtUtils {
     /**
      * The correct way to make it JSON jsonObject.get("dataObject").isObject()
      */
-    public static String toString(JSONValue value) {
+    public static String toString_Basic(JSONValue value) {
         if (value != null)
             return value.toString();
         return null;
@@ -63,8 +63,14 @@ public class SerGwtUtils {
      * Correct Way :The "string" json value is quoted. the proper way is to use
      * !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null
      */
-    public static String toStringJSONValue(JSONValue v) {
+    public static String toString_Extended(JSONValue v) {
         return !isNull(v) ? (v.isString() != null ? v.isString().stringValue() : v.toString()) : null;
+    }
+
+    public static String toString_RemoveQuotes(String v) {
+        if (v != null)
+            return v.replaceAll("\"", "");
+        return null;
     }
 
     public static boolean isNull(JSONValue obj) {
@@ -148,7 +154,7 @@ public class SerGwtUtils {
     }
 
     public static JSONValue fromListString(List<String> list) {
-        return toListJson_FuncJ(list, SerGwtUtils::fromString);
+        return toListJson_FuncJ(list, s-> s!=null ? new JSONString(s) : null);
     }
 
     public static List<Long> toListLong(String json) {
@@ -173,7 +179,7 @@ public class SerGwtUtils {
             List<T> listStructure = new ArrayList<>();
             JSONArray jsonArray = jsonV.isArray();
             for (int i = 0; i < jsonArray.size(); i++) {
-                listStructure.add(convert.apply(toStringJSONValue(jsonArray.get(i))));
+                listStructure.add(convert.apply(toString_Extended(jsonArray.get(i))));
             }
             return listStructure;
         }
@@ -218,7 +224,7 @@ public class SerGwtUtils {
             Set<String> keys = jsonObject.keySet();
             for (String key : keys) {
                 //TODO Maybe there is unneeded check (if the value is null then probably it is not 'set' in the map, so no need to check for not null value)
-                mapStructure.put(convertKey.apply(key), convertValue.apply(toStringJSONValue(jsonObject.get(key))));
+                mapStructure.put(convertKey.apply(key), convertValue.apply(toString_Extended(jsonObject.get(key))));
             }
             return mapStructure;
         }
@@ -247,7 +253,7 @@ public class SerGwtUtils {
                 //JSONValue jsonV =convertKey.apply(key);
                 //String keyV = jsonV.isString()!=null ? jsonV.isString().toString() : jsonV.toString();
                 jsonMap.put(
-                        toStringJSONValue(convertKey.apply(key)),
+                        toString_Extended(convertKey.apply(key)),
                         convertValue.apply(map.get(key))
                 );
             });
@@ -275,3 +281,4 @@ public class SerGwtUtils {
 
 
 }
+
