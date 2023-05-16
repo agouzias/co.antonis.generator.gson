@@ -162,7 +162,7 @@
                                 <echo level="info" message="Cleaning Dir:${folder.release.out}"/>
 
                                 <delete includeEmptyDirs="true" failonerror="false">
-                                    <fileset dir="${folder.release}" includes="**"/>
+                                    <fileset dir="${folder.release.out.public}" includes="**"/>
                                 </delete>
                             </target>
                         </configuration>
