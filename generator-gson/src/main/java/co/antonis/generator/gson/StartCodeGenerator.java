@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class StartCodeGenerator {
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         Set<Class<?>> st_guava = ListClasses.listClassesOfPackage("co.antonis.gwt.gson.pojo", null, null);
 
         Set<Class<?>> set_class_basic = ListClasses.listClass(

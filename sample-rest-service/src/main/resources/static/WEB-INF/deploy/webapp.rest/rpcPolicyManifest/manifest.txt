@@ -1,2 +1,0 @@
-# Module webapp.rest
-# RPC service class, partial path of RPC policy file
