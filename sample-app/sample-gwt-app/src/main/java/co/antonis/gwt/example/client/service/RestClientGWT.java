@@ -9,7 +9,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class RestClientGWT {
     public static String Prefix = "http://localhost:8383";
-    public static String Method = "/api/v1/daq/execute";
+    //since it resides at daqc i am moving on step up
+    public static String Method = "../api/v1/daq/execute";
     public static boolean DEBUG = true;
 
     //region Callback Helpers

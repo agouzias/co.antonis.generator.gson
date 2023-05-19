@@ -9,17 +9,17 @@ import java.lang.String;
 
 public class SerGwtJsonTypes {
   public static Class[] classes = new Class<?>[] {
-  PojoChild.class,
   PojoParent.class,
+  PojoChild.class,
   PojoSimple.class,
   };
 
   public static <T> T fromJson(Class<T> clazz, String json) {
-    if(clazz==PojoChild.class) {
-      return (T)SerGwtJson_Sub.toPojoChild(json);
-    }
     if(clazz==PojoParent.class) {
       return (T)SerGwtJson_Sample.toPojoParent(json);
+    }
+    if(clazz==PojoChild.class) {
+      return (T)SerGwtJson_Sub.toPojoChild(json);
     }
     if(clazz==PojoSimple.class) {
       return (T)SerGwtJson_Sample.toPojoSimple(json);
@@ -31,11 +31,11 @@ public class SerGwtJsonTypes {
     if(structure == null) {
       return null;
     }
-    if(structure instanceof PojoChild) {
-      return SerGwtJson_Sub.fromPojoChild((PojoChild)structure).toString();
-    }
     if(structure instanceof PojoParent) {
       return SerGwtJson_Sample.fromPojoParent((PojoParent)structure).toString();
+    }
+    if(structure instanceof PojoChild) {
+      return SerGwtJson_Sub.fromPojoChild((PojoChild)structure).toString();
     }
     if(structure instanceof PojoSimple) {
       return SerGwtJson_Sample.fromPojoSimple((PojoSimple)structure).toString();
