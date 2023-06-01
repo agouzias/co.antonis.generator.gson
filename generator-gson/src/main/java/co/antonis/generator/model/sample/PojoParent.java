@@ -26,6 +26,9 @@ public class PojoParent {
     int numberInt;
 
     @Expose
+    long[] numberLongArray;
+
+    @Expose
     double numberDouble;
 
     @Expose
@@ -102,6 +105,8 @@ public class PojoParent {
             this.stringB = stringB;
         }
     }
+
+
 
     public boolean isBooleanValue() {
         return isBooleanValue;
