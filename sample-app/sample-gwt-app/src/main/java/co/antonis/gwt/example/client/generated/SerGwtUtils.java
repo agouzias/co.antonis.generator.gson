@@ -1,6 +1,7 @@
 package co.antonis.gwt.example.client.generated;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.json.client.*;
 
 import java.util.*;
@@ -25,6 +26,34 @@ public class SerGwtUtils {
     public static DateTimeFormat dateFormat_Original = DateTimeFormat.getFormat("MMM, d, yyyy hh:mm:ss a");
 
     //region Testing from JSON
+    public static String toJsonFromPrimitiveArrayInt(int[] array){
+        JSONArray jsonArray = new JSONArray();
+        for (int number : array) {
+            jsonArray.set(jsonArray.size(), new JSONNumber(number));
+        }
+        return jsonArray.toString();
+    }
+    public static String toJsonFromPrimitiveArrayLong(long[] array){
+        JSONArray jsonArray = new JSONArray();
+        for (long number : array) {
+            jsonArray.set(jsonArray.size(), new JSONNumber(number));
+        }
+        return jsonArray.toString();
+    }
+    public static String toJsonFromPrimitiveArrayString(String[] array){
+        JSONArray jsonArray = new JSONArray();
+        for (String number : array) {
+            jsonArray.set(jsonArray.size(), new JSONString(number));
+        }
+        return jsonArray.toString();
+    }
+    public static String toJsonFromPrimitiveArrayDate(String[] array){
+        JSONArray jsonArray = new JSONArray();
+        for (String number : array) {
+            jsonArray.set(jsonArray.size(), new JSONString(number));
+        }
+        return jsonArray.toString();
+    }
     //endregion
 
     //region Testing to JSON from Primitive

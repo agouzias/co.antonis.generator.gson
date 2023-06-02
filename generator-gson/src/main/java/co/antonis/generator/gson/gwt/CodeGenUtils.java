@@ -8,8 +8,43 @@ import javax.lang.model.element.Modifier;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CodeGenUtils {
+
+    public static void main(String[] args){
+        System.out.println(isArrayOfPrimitive(int[].class));
+        System.out.println(isArrayOfPrimitive(long[].class));
+        System.out.println(isArrayOfPrimitive(double[].class));
+        System.out.println(isArrayOfPrimitive(Date[].class));
+        System.out.println(isArrayOfPrimitive(String[].class));
+
+        System.out.println(toJson(new String[]{}));
+        System.out.println(isArrayOfPrimitive(long[].class));
+        System.out.println(isArrayOfPrimitive(double[].class));
+        System.out.println(isArrayOfPrimitive(Date[].class));
+        System.out.println(isArrayOfPrimitive(String[].class));
+    }
+
+    public static boolean isArrayOfPrimitive(Class<?> c) {
+        /**
+          CodeGenUtils.toJsonFromPrimitiveArrayInt()
+         *
+         *
+         *
+         */
+
+        //Only xxx is supported
+        return  c.equals(String[].class)
+                || c.equals(Date[].class)
+                || c.isArray() && c.getComponentType().isPrimitive();
+
+    }
+
+    public static <T> String toJson(T[] test){
+        return "test";
+    }
 
     /**
      * Check if a method exist in a specific class

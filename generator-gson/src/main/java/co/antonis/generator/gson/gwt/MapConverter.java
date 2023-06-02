@@ -35,6 +35,15 @@ public class MapConverter {
                         "(s) -> s"
                 )); /*not use s.toString() in function to avoid null pointer*/
 
+        MapConverters.put(int[].class,
+                MethodConvert.i(String.class,
+                        "$$$.isString().stringValue()",
+                        "new JSONString($$$)",
+                        "(str) -> (str!=null) ? new JSONString(str) : null",
+                        "(s) -> s",
+                        "(s) -> s"
+                )); /*not use s.toString() in function to avoid null pointer*/
+
         MapConverters.put(Date.class,
                 MethodConvert.i(Date.class,
                                 classUtilities.simpleName() + ".toDateFromV($$$)",
