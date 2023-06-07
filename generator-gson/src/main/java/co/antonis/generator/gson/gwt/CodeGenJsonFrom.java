@@ -65,7 +65,10 @@ public class CodeGenJsonFrom {
         // Return if it is not supported
         if (!isSupported) {
 
-            method.addComment(CodeGenerator.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
+            if (cg.isGenerateCompileErrorOnNotSupported)
+                method.addStatement(CodeGenerator.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
+            else
+                method.addComment(CodeGenerator.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
 
         } else {
 
@@ -82,8 +85,8 @@ public class CodeGenJsonFrom {
                 //Using Inline function of JSON to Primitive
                 String convertCode = CodeGenerator.converterOf(fI.fieldClass).inline_JsonV_ToClass(fI.jsonObjGet());
                 if (convertCode == null) {
-                    if(CodeGenerator.isGenerateErrorForHeadsUp)
-                        method.addCode(CodeGenerator.Error_Code_HeadsUp.replace("$XXX$","("+fI.toSimpleString()+")"));
+                    if (CodeGenerator.isGenerateErrorForHeadsUp)
+                        method.addCode(CodeGenerator.Error_Code_HeadsUp.replace("$XXX$", "(" + fI.toSimpleString() + ")"));
                     method.addComment("[" + fI.toSimpleString() + "]" + CodeGenerator.NOT_IMPLEMENTED);
                 } else {
                     method.addStatement(fI.structureSet(convertCode), CodeGenerator.classUtilities);

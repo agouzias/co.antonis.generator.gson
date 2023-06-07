@@ -73,6 +73,7 @@ public class CodeGenerator {
     public boolean isGenerateFromJsonMethods = true;
     public boolean isGenerateToJsonMethods = true;
     public boolean isGeneratePostDeserializeIfExist = true;
+    public boolean isGenerateCompileErrorOnNotSupported = true;
     public static Map<Class<?>, Class<?>> Map_Interface_to_Implemented_Classes = new HashMap<>();
 
     public boolean isCheckNotNullValue_BeforeUse = true;
@@ -121,22 +122,24 @@ public class CodeGenerator {
         return this;
     }
 
+    /**
+     * If true generated Compilation errors on non-supported types
+     * By default is true
+     *
+     * @param isError param
+     * @return the CodeGenerator
+     */
+    public CodeGenerator setGenerateCompileErrorOnNotSupportedMembers(boolean isError) {
+        isGenerateCompileErrorOnNotSupported = isError;
+        isGenerateErrorForHeadsUp = isError;
+        return this;
+    }
+
     public CodeGenerator setOptimizeMapToJsonUseKeyStringFunction(boolean isOptimizeMapToJson_UseKeyStringFunc) {
         this.isOptimizeMapToJson_UseKeyStringFunc = isOptimizeMapToJson_UseKeyStringFunc;
         return this;
     }
 
-    /**
-     * If true generated 'XXXToJson(Object) Methods,
-     * By default is true
-     *
-     * @param isGenerateErrorForHeadsUp param
-     * @return the CodeGenerator
-     */
-    public CodeGenerator setGenerateErrorWhenNotFoundSerializersForHeadsUp(boolean isGenerateErrorForHeadsUp) {
-        this.isGenerateErrorForHeadsUp = isGenerateErrorForHeadsUp;
-        return this;
-    }
 
     /**
      * If true in method fromJson before return calls "postDeserialize()" if the method exists
@@ -299,7 +302,6 @@ public class CodeGenerator {
     public final int Convert_Class_ToString = 2;
     public final int Convert_Class_ToJsonV = 3;
 
-    //public String generateCode_Lamda_Converter_StringToType_Or_TypeToJsonV(boolean isFromStringToType, Type fieldType, int iterationIndex) {
     public String generateCode_Lamda_Converter(int typeConvert, Type fieldType, int iterationIndex) {
 
         /*Function<String,Integer> function = new Function<String, Integer>() {
@@ -328,11 +330,11 @@ public class CodeGenerator {
 
                 switch (typeConvert) {
                     case Convert_String_ToClass:
-                        return converterOf(fieldTypeClass).func_String_ToClass;
+                        return converterOf(fieldTypeClass).func_String_to_Class;
                     case Convert_Class_ToString:
-                        return converterOf(fieldTypeClass).func_Class_ToString;
+                        return converterOf(fieldTypeClass).func_Class_to_String;
                     case Convert_Class_ToJsonV:
-                        return converterOf(fieldTypeClass).func_Class_ToJsonV;
+                        return converterOf(fieldTypeClass).func_Class_to_JsonV;
                 }
 
             } else if (fieldTypeClass.isEnum()) {

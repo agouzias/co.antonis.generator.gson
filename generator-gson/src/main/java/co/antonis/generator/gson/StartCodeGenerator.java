@@ -11,11 +11,9 @@ public class StartCodeGenerator {
         Set<Class<?>> st_guava = ListClasses.listClassesOfPackage("co.antonis.gwt.gson.pojo", null, null);
 
         Set<Class<?>> set_class_basic = ListClasses.listClass(
-                "co.antonis.generator.model.sample.PojoParent"
-                /*,
+                "co.antonis.generator.model.sample.PojoParent",
                 "co.antonis.generator.model.sample.PojoSimple",
                 "co.antonis.generator.model.sample.sub.PojoChild"
-                */
         );
 
 

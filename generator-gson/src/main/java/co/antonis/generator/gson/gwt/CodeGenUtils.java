@@ -28,13 +28,6 @@ public class CodeGenUtils {
     }
 
     public static boolean isArrayOfPrimitive(Class<?> c) {
-        /**
-          CodeGenUtils.toJsonFromPrimitiveArrayInt()
-         *
-         *
-         *
-         */
-
         //Only xxx is supported
         return  c.equals(String[].class)
                 || c.equals(Date[].class)
@@ -139,7 +132,7 @@ public class CodeGenUtils {
 
             /* public static Date toDate(JSONValue json) Method */
             classBuilder.addMethod(MethodSpec
-                    .methodBuilder("toDateFromV")
+                    .methodBuilder("toDate_FromJsonV")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(CodeGenerator.classJsonValue, "jsonDate")
                     .returns(Date.class)
@@ -147,7 +140,7 @@ public class CodeGenUtils {
 
             /* public static Date toDate(String json) Method */
             classBuilder.addMethod(MethodSpec
-                    .methodBuilder("toDateFromS")
+                    .methodBuilder("toDate_FromS")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(String.class, "jsonDate")
                     .returns(Date.class)

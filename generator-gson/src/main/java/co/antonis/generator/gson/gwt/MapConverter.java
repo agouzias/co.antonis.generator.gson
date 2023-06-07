@@ -19,6 +19,10 @@ public class MapConverter {
      * inline OR method based (needed in list/map)
      */
     static {
+
+
+
+
         /*
          * Supported Primitive Types and convert function (inline and methods - for loops and maps)
          * Note that 'inline' (str->value) don't do 'null' since we check that jsonObject['field'] is not null before usage.
@@ -35,21 +39,35 @@ public class MapConverter {
                         "(s) -> s"
                 )); /*not use s.toString() in function to avoid null pointer*/
 
-        MapConverters.put(int[].class,
-                MethodConvert.i(String.class,
-                        "$$$.isString().stringValue()",
-                        "new JSONString($$$)",
-                        "(str) -> (str!=null) ? new JSONString(str) : null",
-                        "(s) -> s",
-                        "(s) -> s"
-                )); /*not use s.toString() in function to avoid null pointer*/
+
+        MapConverters.put(long[].class,
+                MethodConvert.i(long[].class,
+                                classUtilities.simpleName() + ".toArrayLong_FromJsonV($$$)",
+                                classUtilities.simpleName() + ".toJsonV_FromArrayLong($$$)",
+                                "(pojo) -> " + classUtilities.simpleName() + ".toJsonV_FromArrayLong(pojo)",
+                                null,
+                                null
+                        )
+                        .setInUtilitiesClass(true)
+        );
+
+        MapConverters.put(double[].class,
+                MethodConvert.i(double[].class,
+                                classUtilities.simpleName() + ".toArrayDouble_FromJsonV($$$)",
+                                classUtilities.simpleName() + ".toJsonV_FromArrayDouble($$$)",
+                                "(pojo) -> " + classUtilities.simpleName() + ".toJsonV_FromArrayDouble(pojo)",
+                                null,
+                                null
+                        )
+                        .setInUtilitiesClass(true)
+        );
 
         MapConverters.put(Date.class,
                 MethodConvert.i(Date.class,
-                                classUtilities.simpleName() + ".toDateFromV($$$)",
-                                classUtilities.simpleName() + ".toVFromDate($$$)",
-                                "(pojo) -> " + classUtilities.simpleName() + ".toVFromDate(pojo)",
-                                "(s) -> " + classUtilities.simpleName() + ".toDateFromS(s)",
+                                classUtilities.simpleName() + ".toDate_FromJsonV($$$)",
+                                classUtilities.simpleName() + ".toJsonV_FromDate($$$)",
+                                "(pojo) -> " + classUtilities.simpleName() + ".toJsonV_FromDate(pojo)",
+                                "(s) -> " + classUtilities.simpleName() + ".toDate_FromS(s)",
                                 "(dt) -> dt!=null ? Long.toString(dt.getTime()) : null"
                         )
                         .setInUtilitiesClass(true)

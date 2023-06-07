@@ -21,7 +21,7 @@ public class MethodConvert<C> {
      *      "Float.parseFloat($$$.toString())"
      *      "$$$.isString().stringValue() to jsonObject.get("string").isString().stringValue()"
      */
-    public String inline_JsonV_ToClass;
+    public String inline_JsonV_to_Class;
 
     /**
      * Function<T,String>
@@ -31,16 +31,16 @@ public class MethodConvert<C> {
      * <p>
      * Example "(s)-> s!=null ? Float.parseFloat(s): 0f"
      */
-    public String func_String_ToClass;
-    public String func_Class_ToString;
+    public String func_String_to_Class;
+    public String func_Class_to_String;
 
     /**
      * Function<T, JSONValue>
      * Function<Integer, JSONValue> f = (s) -> new JSONNumber(s)
      *
      */
-    public String func_Class_ToJsonV;
-    public String inline_Class_ToJsonV;
+    public String func_Class_to_JsonV;
+    public String inline_Class_to_JsonV;
 
     /**
      *
@@ -51,12 +51,12 @@ public class MethodConvert<C> {
     }
 
     public static <C> MethodConvert<C> i(Class<C> clazz,
-                                         String inline_JsonV_ToClass,
+                                         String inline_JsonV_to_Class,
                                          String inline_Class_toJsonV,
-                                         String func_Class_ToJsonV,
-                                         String func_String_ToClass,
-                                         String func_Class_ToString) {
-        return new MethodConvert<C>(clazz, inline_JsonV_ToClass, inline_Class_toJsonV, func_Class_ToJsonV, func_String_ToClass, func_Class_ToString,  false);
+                                         String func_Class_to_JsonV,
+                                         String func_String_to_Class,
+                                         String func_Class_to_String) {
+        return new MethodConvert<C>(clazz, inline_JsonV_to_Class, inline_Class_toJsonV, func_Class_to_JsonV, func_String_to_Class, func_Class_to_String,  false);
     }
 
     public MethodConvert(Class<C> clazz,
@@ -67,29 +67,29 @@ public class MethodConvert<C> {
                          String func_Class_ToString,
                          boolean isInUtilitiesClass) {
         this.clazz = clazz;
-        this.inline_JsonV_ToClass = inline_JsonV_ToClass;
-        this.inline_Class_ToJsonV = inline_Class_ToJsonV;
-        this.func_Class_ToJsonV = func_Class_ToJsonV;
+        this.inline_JsonV_to_Class = inline_JsonV_ToClass;
+        this.inline_Class_to_JsonV = inline_Class_ToJsonV;
+        this.func_Class_to_JsonV = func_Class_ToJsonV;
 
-        this.func_String_ToClass = func_String_ToClass;
-        this.func_Class_ToString = func_Class_ToString;
+        this.func_String_to_Class = func_String_ToClass;
+        this.func_Class_to_String = func_Class_ToString;
 
         this.isInUtilitiesClass = isInUtilitiesClass;
     }
 
     public String inline_JsonV_ToClass(String parameterName) {
-        if (inline_JsonV_ToClass != null)
-            return inline_JsonV_ToClass.replace("$$$", parameterName);
+        if (inline_JsonV_to_Class != null)
+            return inline_JsonV_to_Class.replace("$$$", parameterName);
         return null;
     }
 
     public String inline_Class_ToJsonV(String parameterName) {
-        if (inline_Class_ToJsonV != null)
-            return inline_Class_ToJsonV.replace("$$$", parameterName);
+        if (inline_Class_to_JsonV != null)
+            return inline_Class_to_JsonV.replace("$$$", parameterName);
         return null;
     }
 
-    public MethodConvert setInUtilitiesClass(boolean inUtilitiesClass) {
+    public MethodConvert<C> setInUtilitiesClass(boolean inUtilitiesClass) {
         isInUtilitiesClass = inUtilitiesClass;
         return this;
     }

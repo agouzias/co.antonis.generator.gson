@@ -152,6 +152,14 @@ public class PojoParent {
         return numberLong;
     }
 
+    public long[] getNumberLongArray() {
+        return numberLongArray;
+    }
+
+    public void setNumberLongArray(long[] numberLongArray) {
+        this.numberLongArray = numberLongArray;
+    }
+
     public void setNumberLong(Long numberLong) {
         this.numberLong = numberLong;
     }

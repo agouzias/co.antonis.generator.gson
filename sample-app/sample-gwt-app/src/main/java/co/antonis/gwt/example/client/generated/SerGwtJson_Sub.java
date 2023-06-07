@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * Generated for total 1 structures 
  * 
- * @see co.antonis.generator.model.sample.sub.PojoChild [fields:23/1] 
+ * @see co.antonis.generator.model.sample.sub.PojoChild [fields:24/1] 
  */
 public class SerGwtJson_Sub {
   public static Logger log = Logger.getLogger("");
@@ -53,7 +53,7 @@ public class SerGwtJson_Sub {
       structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("isBooleanValue").toString()));
     }
     if(jsonObject.get("date")!=null) {
-      structure.setDate(SerGwtUtils.toDateFromV(jsonObject.get("date")));
+      structure.setDate(SerGwtUtils.toDate_FromJsonV(jsonObject.get("date")));
     }
     if(jsonObject.get("listString")!=null) {
       structure.setListString(SerGwtUtils.toListPojo_JsonV_FuncS(
@@ -139,6 +139,9 @@ public class SerGwtJson_Sub {
     if(jsonObject.get("id")!=null) {
       structure.setNumberLong(Long.parseLong(jsonObject.get("id").toString()));
     }
+    if(jsonObject.get("numberLongArray")!=null) {
+      structure.setNumberLongArray(SerGwtUtils.toArrayLong_FromJsonV(jsonObject.get("numberLongArray")));
+    }
     return structure;
   }
 
@@ -165,7 +168,7 @@ public class SerGwtJson_Sub {
     }
     jsonObject.put("isBooleanValue",JSONBoolean.getInstance(structure.isBooleanValue()));
     if(structure.getDate()!=null) {
-      jsonObject.put("date",SerGwtUtils.toVFromDate(structure.getDate()));
+      jsonObject.put("date",SerGwtUtils.toJsonV_FromDate(structure.getDate()));
     }
     if(structure.getListString()!=null) {
       jsonObject.put("listString",SerGwtUtils.toListJson_FuncJ(
@@ -242,6 +245,9 @@ public class SerGwtJson_Sub {
     }
     if(structure.getNumberLong()!=null) {
       jsonObject.put("id",new JSONNumber(structure.getNumberLong()));
+    }
+    if(structure.getNumberLongArray()!=null) {
+      jsonObject.put("numberLongArray",SerGwtUtils.toJsonV_FromArrayLong(structure.getNumberLongArray()));
     }
     return jsonObject;
   }

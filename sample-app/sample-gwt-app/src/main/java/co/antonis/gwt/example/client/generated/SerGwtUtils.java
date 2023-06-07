@@ -1,7 +1,6 @@
 package co.antonis.gwt.example.client.generated;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.json.client.*;
 
 import java.util.*;
@@ -25,35 +24,110 @@ public class SerGwtUtils {
     public static DateTimeFormat dateFormat_ISO8601 = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     public static DateTimeFormat dateFormat_Original = DateTimeFormat.getFormat("MMM, d, yyyy hh:mm:ss a");
 
+
+    //region Primitive Array Converter
+    public static long[] toArrayLong_FromJsonV(JSONValue json) {
+        JSONArray jsonArray = json.isArray();
+        if (jsonArray != null) {
+            int length = jsonArray.size();
+            long[] array = new long[length];
+
+            for (int i = 0; i < length; i++) {
+                JSONNumber jsonNumber = jsonArray.get(i).isNumber();
+                if (jsonNumber != null) {
+                    array[i] = (long) jsonNumber.doubleValue();
+                } else {
+                    // Handle error case where value is not a number
+                    // You can throw an exception, log an error, or handle it in a way that suits your needs
+                }
+            }
+            return array;
+        }
+        return null;
+    }
+
+
+    public static JSONArray toJsonV_FromArrayLong(long[] value) {
+        if (value == null)
+            return null;
+        JSONArray jsonArr = new JSONArray();
+        int index = 0;
+        for(long val:value){
+            jsonArr.set(index++,new JSONNumber(val));
+        }
+        return jsonArr;
+    }
+
+    public static double[] toArrayDouble_FromJsonV(JSONValue json) {
+        JSONArray jsonArray = json.isArray();
+        if (jsonArray != null) {
+            int length = jsonArray.size();
+            double[] array = new double[length];
+
+            for (int i = 0; i < length; i++) {
+                JSONNumber jsonNumber = jsonArray.get(i).isNumber();
+                if (jsonNumber != null) {
+                    array[i] = (long) jsonNumber.doubleValue();
+                } else {
+                    // Handle error case where value is not a number
+                    // You can throw an exception, log an error, or handle it in a way that suits your needs
+                }
+            }
+            return array;
+        }
+        return null;
+    }
+
+
+    public static JSONArray toJsonV_FromArrayDouble(double[] value) {
+        if (value == null)
+            return null;
+        JSONArray jsonArr = new JSONArray();
+        int index = 0;
+        for(double val:value){
+            jsonArr.set(index++,new JSONNumber(val));
+        }
+        return jsonArr;
+    }
+    //endregion
+
+
     //region Testing from JSON
-    public static String toJsonFromPrimitiveArrayInt(int[] array){
+
+
+    public static String toJsonFromPrimitiveArrayInt(int[] array) {
         JSONArray jsonArray = new JSONArray();
         for (int number : array) {
             jsonArray.set(jsonArray.size(), new JSONNumber(number));
         }
         return jsonArray.toString();
     }
-    public static String toJsonFromPrimitiveArrayLong(long[] array){
+
+    public static String toJsonFromPrimitiveArrayLong(long[] array) {
         JSONArray jsonArray = new JSONArray();
         for (long number : array) {
             jsonArray.set(jsonArray.size(), new JSONNumber(number));
         }
         return jsonArray.toString();
     }
-    public static String toJsonFromPrimitiveArrayString(String[] array){
+
+    public static String toJsonFromPrimitiveArrayString(String[] array) {
         JSONArray jsonArray = new JSONArray();
         for (String number : array) {
             jsonArray.set(jsonArray.size(), new JSONString(number));
         }
         return jsonArray.toString();
     }
-    public static String toJsonFromPrimitiveArrayDate(String[] array){
+
+    public static String toJsonFromPrimitiveArrayDate(String[] array) {
         JSONArray jsonArray = new JSONArray();
         for (String number : array) {
             jsonArray.set(jsonArray.size(), new JSONString(number));
         }
         return jsonArray.toString();
     }
+
+
     //endregion
 
     //region Testing to JSON from Primitive
@@ -135,8 +209,8 @@ public class SerGwtUtils {
     }
     //endregion
 
-    //region Methods to/from JSON to Date Converter
-    public static Date toDateFromV(JSONValue jsonDate) {
+    //region Methods to/from JSON to Date Converter toDateFromV
+    public static Date toDate_FromJsonV(JSONValue jsonDate) {
         if (jsonDate == null)
             return null;
         if (jsonDate.isNumber() != null)
@@ -154,7 +228,7 @@ public class SerGwtUtils {
         throw new RuntimeException("Unable to convert date from json " + jsonDate);
     }
 
-    public static Date toDateFromS(String jsonDate) {
+    public static Date toDate_FromS(String jsonDate) {
         if (jsonDate == null)
             return null;
         //the toString() add quotes
@@ -170,7 +244,8 @@ public class SerGwtUtils {
         return dateFormat_Original.parse(jsonDate);
     }
 
-    public static JSONNumber toVFromDate(Date date) {
+    //toVFromDate
+    public static JSONNumber toJsonV_FromDate(Date date) {
         if (date == null)
             return null;
         return new JSONNumber(date.getTime());
@@ -183,7 +258,7 @@ public class SerGwtUtils {
     }
 
     public static JSONValue fromListString(List<String> list) {
-        return toListJson_FuncJ(list, s-> s!=null ? new JSONString(s) : null);
+        return toListJson_FuncJ(list, s -> s != null ? new JSONString(s) : null);
     }
 
     public static List<Long> toListLong(String json) {

@@ -1,6 +1,7 @@
 package co.antonis.gwt.example.client.generated;
 
 import co.antonis.generator.model.sample.PojoParent;
+import co.antonis.generator.model.sample.PojoSimple;
 import co.antonis.generator.model.sample.PojoType;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
@@ -12,9 +13,10 @@ import java.lang.String;
 import java.util.logging.Logger;
 
 /**
- * Generated for total 1 structures 
+ * Generated for total 2 structures 
  * 
  * @see co.antonis.generator.model.sample.PojoParent [fields:23/23] 
+ * @see co.antonis.generator.model.sample.PojoSimple [fields:4/4] 
  */
 public class SerGwtJson_Sample {
   public static Logger log = Logger.getLogger("");
@@ -53,7 +55,7 @@ public class SerGwtJson_Sample {
       structure.setBooleanValue(Boolean.parseBoolean(jsonObject.get("isBooleanValue").toString()));
     }
     if(jsonObject.get("date")!=null) {
-      structure.setDate(SerGwtUtils.toDateFromV(jsonObject.get("date")));
+      structure.setDate(SerGwtUtils.toDate_FromJsonV(jsonObject.get("date")));
     }
     if(jsonObject.get("listString")!=null) {
       structure.setListString(SerGwtUtils.toListPojo_JsonV_FuncS(
@@ -79,11 +81,9 @@ public class SerGwtJson_Sample {
           (s0)->SerGwtUtils.toMapPojo_String_FuncS(
           s0,
           (s) -> s!=null ? Integer.parseInt(s) : null,
-          (s1)->
-          [TODO - Heads UP, Null Converter or Other]
-          SerGwtUtils.toListPojo_String_FuncS(
+          (s1)->SerGwtUtils.toListPojo_String_FuncS(
           s1,
-          null)
+          (s) -> SerGwtJson_Sample.toPojoSimple(s))
           )
           )
           );
@@ -94,7 +94,9 @@ public class SerGwtJson_Sample {
           (s) -> s!=null ? co.antonis.generator.model.sample.PojoType.valueOf(s) : null)
           );
     }
-    // TODO [simple][class co.antonis.generator.model.sample.PojoSimple] Warning, Not supported type, the field will be ignored.
+    if(jsonObject.get("child")!=null) {
+      structure.setSimple(SerGwtJson_Sample.toPojoSimple(jsonObject.get("child").isObject().toString()));
+    }
     if(jsonObject.get("charA")!=null) {
       structure.setCharA(jsonObject.get("charA").isString().stringValue().charAt(0));
     }
@@ -114,12 +116,10 @@ public class SerGwtJson_Sample {
       structure.setCharNotSet(jsonObject.get("charNotSet").isString().stringValue().charAt(0));
     }
     if(jsonObject.get("mapChild")!=null) {
-      structure.setMapChild(
-          [TODO - Heads UP, Null Converter or Other]
-          SerGwtUtils.toMapPojo_JsonV_FuncS(
+      structure.setMapChild(SerGwtUtils.toMapPojo_JsonV_FuncS(
           jsonObject.get("mapChild"),
           (s) -> s!=null ? Integer.parseInt(s) : null,
-          null)
+          (s) -> SerGwtJson_Sample.toPojoSimple(s))
           );
     }
     if(jsonObject.get("boolValue")!=null) {
@@ -129,18 +129,18 @@ public class SerGwtJson_Sample {
       structure.setMapListChild(SerGwtUtils.toMapPojo_JsonV_FuncS(
           jsonObject.get("mapListChild"),
           (s) -> s!=null ? Integer.parseInt(s) : null,
-          (s0)->
-          [TODO - Heads UP, Null Converter or Other]
-          SerGwtUtils.toListPojo_String_FuncS(
+          (s0)->SerGwtUtils.toListPojo_String_FuncS(
           s0,
-          null)
+          (s) -> SerGwtJson_Sample.toPojoSimple(s))
           )
           );
     }
     if(jsonObject.get("id")!=null) {
       structure.setNumberLong(Long.parseLong(jsonObject.get("id").toString()));
     }
-    // TODO [numberLongArray][class [J] Warning, Not supported type, the field will be ignored.
+    if(jsonObject.get("numberLongArray")!=null) {
+      structure.setNumberLongArray(SerGwtUtils.toArrayLong_FromJsonV(jsonObject.get("numberLongArray")));
+    }
     return structure;
   }
 
@@ -167,7 +167,7 @@ public class SerGwtJson_Sample {
     }
     jsonObject.put("isBooleanValue",JSONBoolean.getInstance(structure.isBooleanValue()));
     if(structure.getDate()!=null) {
-      jsonObject.put("date",SerGwtUtils.toVFromDate(structure.getDate()));
+      jsonObject.put("date",SerGwtUtils.toJsonV_FromDate(structure.getDate()));
     }
     if(structure.getListString()!=null) {
       jsonObject.put("listString",SerGwtUtils.toListJson_FuncJ(
@@ -193,11 +193,9 @@ public class SerGwtJson_Sample {
           (pojo0)->SerGwtUtils.toMapJson_FuncJ_FuncS(
           pojo0,
           (num) -> num!=null ? Integer.toString(num) : null,
-          (pojo1)->
-          [TODO - Heads UP, Null Converter or Other]
-          SerGwtUtils.toListJson_FuncJ(
+          (pojo1)->SerGwtUtils.toListJson_FuncJ(
           pojo1,
-          null)
+          (pojo) -> SerGwtJson_Sample.fromPojoSimple(pojo))
           )
           )
           );
@@ -208,7 +206,9 @@ public class SerGwtJson_Sample {
           (pojo) -> pojo!=null ? new com.google.gwt.json.client.JSONString(pojo.name()) : null)
           );
     }
-    // TODO [simple][class co.antonis.generator.model.sample.PojoSimple] Warning, Not supported type, the field will be ignored.
+    if(structure.getSimple()!=null) {
+      jsonObject.put("child",SerGwtJson_Sample.fromPojoSimple(structure.getSimple()));
+    }
     
     [TODO - Heads UP, Null Converter or Other]
     // [[charA][char]]Not implemented. Consider to add it manually or ignore field
@@ -224,12 +224,10 @@ public class SerGwtJson_Sample {
     [TODO - Heads UP, Null Converter or Other]
     // [[charNotSet][char]]Not implemented. Consider to add it manually or ignore field
     if(structure.getMapChild()!=null) {
-      jsonObject.put("mapChild",
-          [TODO - Heads UP, Null Converter or Other]
-          SerGwtUtils.toMapJson_FuncJ_FuncS(
+      jsonObject.put("mapChild",SerGwtUtils.toMapJson_FuncJ_FuncS(
           structure.getMapChild(),
           (num) -> num!=null ? Integer.toString(num) : null,
-          null)
+          (pojo) -> SerGwtJson_Sample.fromPojoSimple(pojo))
           );
     }
     jsonObject.put("boolValue",JSONBoolean.getInstance(structure.isBoolValue()));
@@ -237,18 +235,65 @@ public class SerGwtJson_Sample {
       jsonObject.put("mapListChild",SerGwtUtils.toMapJson_FuncJ_FuncS(
           structure.getMapListChild(),
           (num) -> num!=null ? Integer.toString(num) : null,
-          (pojo0)->
-          [TODO - Heads UP, Null Converter or Other]
-          SerGwtUtils.toListJson_FuncJ(
+          (pojo0)->SerGwtUtils.toListJson_FuncJ(
           pojo0,
-          null)
+          (pojo) -> SerGwtJson_Sample.fromPojoSimple(pojo))
           )
           );
     }
     if(structure.getNumberLong()!=null) {
       jsonObject.put("id",new JSONNumber(structure.getNumberLong()));
     }
-    // TODO [numberLongArray][class [J] Warning, Not supported type, the field will be ignored.
+    if(structure.getNumberLongArray()!=null) {
+      jsonObject.put("numberLongArray",SerGwtUtils.toJsonV_FromArrayLong(structure.getNumberLongArray()));
+    }
+    return jsonObject;
+  }
+
+  public static PojoSimple toPojoSimple(String json) {
+    JSONValue jsonValue = JSONParser.parseStrict(json);
+    JSONObject jsonObject = jsonValue.isObject();
+    
+    if (jsonObject == null)  {
+      return null;
+    }
+    PojoSimple structure = new PojoSimple();
+    if(jsonObject.get("dateSimple")!=null) {
+      structure.setDateSimple(SerGwtUtils.toDate_FromJsonV(jsonObject.get("dateSimple")));
+    }
+    if(jsonObject.get("listDateSimple")!=null) {
+      structure.setListDateSimple(SerGwtUtils.toListPojo_JsonV_FuncS(
+          jsonObject.get("listDateSimple"),
+          (s) -> SerGwtUtils.toDate_FromS(s))
+          );
+    }
+    if(jsonObject.get("intSimple")!=null) {
+      structure.setIntSimple(Integer.parseInt(jsonObject.get("intSimple").toString()));
+    }
+    if(jsonObject.get("stringSimple")!=null) {
+      structure.setStringSimple(jsonObject.get("stringSimple").isString().stringValue());
+    }
+    return structure;
+  }
+
+  public static JSONObject fromPojoSimple(PojoSimple structure) {
+    if (structure == null)  {
+      return null;
+    }
+    JSONObject jsonObject = new JSONObject();
+    if(structure.getDateSimple()!=null) {
+      jsonObject.put("dateSimple",SerGwtUtils.toJsonV_FromDate(structure.getDateSimple()));
+    }
+    if(structure.getListDateSimple()!=null) {
+      jsonObject.put("listDateSimple",SerGwtUtils.toListJson_FuncJ(
+          structure.getListDateSimple(),
+          (pojo) -> SerGwtUtils.toJsonV_FromDate(pojo))
+          );
+    }
+    jsonObject.put("intSimple",new JSONNumber(structure.getIntSimple()));
+    if(structure.getStringSimple()!=null) {
+      jsonObject.put("stringSimple",new JSONString(structure.getStringSimple()));
+    }
     return jsonObject;
   }
 }

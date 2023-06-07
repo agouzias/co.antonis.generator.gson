@@ -54,7 +54,10 @@ public class CodeGenJsonTo {
 
         if (!isSupported) {
 
-            method.addComment(CodeGenerator.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
+            if (cg.isGenerateCompileErrorOnNotSupported)
+                method.addStatement(CodeGenerator.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
+            else
+                method.addComment(CodeGenerator.toComment_safe("TODO " + fI.toSimpleString() + " Warning, Not supported type, the field will be ignored."));
 
         } else {
 
