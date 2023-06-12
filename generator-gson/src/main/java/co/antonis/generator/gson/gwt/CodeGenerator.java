@@ -73,6 +73,7 @@ public class CodeGenerator {
     public boolean isGenerateFromJsonMethods = true;
     public boolean isGenerateToJsonMethods = true;
     public boolean isGeneratePostDeserializeIfExist = true;
+    public boolean isGenerateClassWithAllFromToMethods = false;
     public boolean isGenerateCompileErrorOnNotSupported = true;
     public static Map<Class<?>, Class<?>> Map_Interface_to_Implemented_Classes = new HashMap<>();
 
@@ -119,6 +120,18 @@ public class CodeGenerator {
      */
     public CodeGenerator setGenerateToJsonMethods(boolean generateToJson) {
         isGenerateToJsonMethods = generateToJson;
+        return this;
+    }
+
+    /**
+     * If true generated 'XXXToJson(Object) Methods,
+     * By default is true
+     *
+     * @param generateToJson param
+     * @return the CodeGenerator
+     */
+    public CodeGenerator setGenerateClassWithAllFromToMethods(boolean generateToJson) {
+        isGenerateClassWithAllFromToMethods = generateToJson;
         return this;
     }
 
@@ -586,7 +599,8 @@ public class CodeGenerator {
         List<JavaFile> listJavaFile = new ArrayList<>();
 
         List<TypeSpec> listSpecs = generate_JavaCode(setClasses);
-        listSpecs.add(CodeGenUtils.generate_javaCodeTypes(this, this.generatedClassName + "Types", isGenerateFromJsonMethods, isGenerateToJsonMethods));
+        if (isGenerateClassWithAllFromToMethods)
+            listSpecs.add(CodeGenUtils.generate_javaCodeTypes(this, this.generatedClassName + "Types", isGenerateFromJsonMethods, isGenerateToJsonMethods));
 
         /*
          * E. Export
